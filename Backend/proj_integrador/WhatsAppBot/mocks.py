@@ -2,7 +2,7 @@ import datetime
 import random
 from typing import List
 
-from .bot_enums import LocalAtendimento
+from botCore.bot_enums import LocalAtendimento
 
 
 def buscarAgendamentosDisponiveisNoPeriodoMock(total_dias: int)-> List[dict]:

@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from Agendamento.models import Customer, Appointment, Service
 from .engine import processar_mensagem_whatsapp, get_conversation
-from .bot_enums import Status
+from botCore.bot_enums import Status
 from botCore.helper import conversations, MensagemBOT
 
 MOCK_DATAS_DISPONIVEIS = [date.today() + timedelta(days=i) for i in range(1, 6)]
