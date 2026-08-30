@@ -1,4 +1,4 @@
-# Projeto Integrador I
+# Projeto Integrador II
 
 Sistema web para agendamento e gerenciamento de usuários, desenvolvido em Django como parte do Projeto Integrador I da Univesp.
 
