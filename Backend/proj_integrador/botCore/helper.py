@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from xmlrpc.client import DateTime
 
 from Agendamento.models import Appointment
-from .bot_enums import Status
+from bot_enums import Status
 
 class MensagemBOT:
     DATA_EM_USO = "Opa, esta data já está ocupada, por favor, informe uma outra opção."

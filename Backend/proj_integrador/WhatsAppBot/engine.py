@@ -1,13 +1,13 @@
 from datetime import datetime, time
 from Agendamento.models import Appointment, Customer, Service
-from .bot.dtos import UsuarioContextoDTO, AgendamentoDTO
-from .bot.utils import opcao_cancelar, opcao_consultar, opcao_agendar, opcao_sair, checar_email, set_state
-from .helper import MensagemBOT, Conversation, conversations
+from botCore.dtos import UsuarioContextoDTO, AgendamentoDTO
+from botCore.utils import opcao_cancelar, opcao_consultar, opcao_agendar, opcao_sair, checar_email, set_state
+from botCore.helper import MensagemBOT, Conversation, conversations
 from .bot_enums import Status, LocalAtendimento
-from .send_message import enviar_mensagem
+from botCore.send_message import enviar_mensagem_via_whats
 import secrets
 
-def processar_mensagem(mensagem_do_usuario: str, bot_telefone: str, usuario_telefone: str, nome_usuario: str):
+def processar_mensagem_whatsapp(mensagem_do_usuario: str, bot_telefone: str, usuario_telefone: str, nome_usuario: str):
     conv = get_conversation(usuario_telefone)
 
     endereco_padrao: str = "Rua Nelson Tigrão, 15, Vila Missionária, CEP: 04430-165"
@@ -73,12 +73,12 @@ def gerenciar_status_inicial(usuario_telefone: str, bot_telefone: str) -> None:
     usuario = Customer.objects.buscar_usuario_por_telefone(usuario_telefone)
 
     if usuario:
-        enviar_mensagem(usuario_telefone, MensagemBOT.bem_vindo_customizado(usuario.name), bot_telefone)
-        enviar_mensagem(usuario_telefone, MensagemBOT.MENU_PRINCIPAL, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.bem_vindo_customizado(usuario.name), bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.MENU_PRINCIPAL, bot_telefone)
         set_state(usuario_telefone, Status.AGUARDANDO_OPCAO_MENU)
         return
 
-    enviar_mensagem(usuario_telefone, MensagemBOT.BOAS_VINDAS, bot_telefone)
+    enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.BOAS_VINDAS, bot_telefone)
     set_state(usuario_telefone, Status.VALIDANDO_USUARIO)
 
 
@@ -87,7 +87,7 @@ def gerenciar_validacao_usuario(usuario_telefone: str, bot_telefone: str, mensag
 
     if not mensagem or mensagem.isdigit() or len(mensagem) < 2:
         set_state(usuario_telefone, Status.VALIDANDO_USUARIO)
-        enviar_mensagem(usuario_telefone, MensagemBOT.NOME_NAO_INFORMADO, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.NOME_NAO_INFORMADO, bot_telefone)
         return
 
     conv = get_conversation(usuario_telefone)
@@ -96,7 +96,7 @@ def gerenciar_validacao_usuario(usuario_telefone: str, bot_telefone: str, mensag
     usuario_existe: bool = Customer.objects.checar_se_usuario_existe_por_telefone(usuario_telefone)
 
     if usuario_existe:
-        enviar_mensagem(usuario_telefone, MensagemBOT.MENU_PRINCIPAL, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.MENU_PRINCIPAL, bot_telefone)
         usuario: Customer = Customer.objects.buscar_usuario_por_telefone(usuario_telefone)
         conv.data["usuario"].wa_id = usuario.phone
         conv.data["usuario"].email = usuario.email
@@ -104,43 +104,43 @@ def gerenciar_validacao_usuario(usuario_telefone: str, bot_telefone: str, mensag
         set_state(usuario_telefone, Status.AGUARDANDO_OPCAO_MENU)
 
     else:
-        enviar_mensagem(usuario_telefone, MensagemBOT.NUMERO_NAO_CADASTRADO, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.NUMERO_NAO_CADASTRADO, bot_telefone)
         set_state(usuario_telefone, Status.SOLICITACAO_PARA_CRIAR_CONTA)
 
 
 def gerenciar_solicitacao_para_criar_conta(usuario_telefone: str, bot_telefone: str, mensagem_do_usuario: str) -> None:
     if not mensagem_do_usuario.isdigit():
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
         return
 
     if mensagem_do_usuario == "1":
-        enviar_mensagem(usuario_telefone, MensagemBOT.SOLICITAR_DADOS_CADASTRO, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.SOLICITAR_DADOS_CADASTRO, bot_telefone)
         set_state(usuario_telefone, Status.SOLICITACAO_PARA_EMAIL)
 
     elif mensagem_do_usuario == "2":
-        enviar_mensagem(usuario_telefone, MensagemBOT.SAIR, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.SAIR, bot_telefone)
         set_state(usuario_telefone, Status.INICIAL)
 
     else:
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
 
 
 def gerenciar_solicitacao_para_email(usuario_telefone: str, bot_telefone: str, mensagem_do_usuario: str) -> None:
     if not checar_email(mensagem_do_usuario):
-        enviar_mensagem(usuario_telefone, MensagemBOT.EMAIL_INVALIDO, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.EMAIL_INVALIDO, bot_telefone)
         return
 
     conv = get_conversation(usuario_telefone)
     conv.data["usuario"].email = mensagem_do_usuario
     senha = secrets.token_urlsafe(12)
     Customer.objects.cadastrar_usuario(conv.data["usuario"].nome, conv.data["usuario"].email, conv.data["usuario"].wa_id, senha)
-    enviar_mensagem(usuario_telefone, MensagemBOT.MENU_PRINCIPAL, bot_telefone)
+    enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.MENU_PRINCIPAL, bot_telefone)
     set_state(usuario_telefone, Status.AGUARDANDO_OPCAO_MENU)
 
 
 def gerenciar_menu_principal(usuario_telefone: str, bot_telefone: str, mensagem_do_usuario: str) -> None:
     if not mensagem_do_usuario.isdigit():
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
         return
 
     conv = get_conversation(usuario_telefone)
@@ -158,7 +158,7 @@ def gerenciar_menu_principal(usuario_telefone: str, bot_telefone: str, mensagem_
         opcao_sair(conv, usuario_telefone, bot_telefone)
 
     else:
-        enviar_mensagem(usuario_telefone,MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
 
 
 def gerenciar_escolha_data(usuario_telefone: str, bot_telefone: str, mensagem_do_usuario: str) -> None:
@@ -167,19 +167,19 @@ def gerenciar_escolha_data(usuario_telefone: str, bot_telefone: str, mensagem_do
     agendamentos = conv.data["agendamento"].datas_disponiveis
 
     if not mensagem.isdigit():
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
         return
 
     indice = int(mensagem)
 
     if indice < 1 or indice > len(agendamentos):
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
         return
 
     data_em_uso: bool = Appointment.objects.checar_se_data_esta_em_uso(agendamentos[indice - 1])
 
     if data_em_uso:
-        enviar_mensagem(usuario_telefone, MensagemBOT.DATA_EM_USO, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.DATA_EM_USO, bot_telefone)
         return
 
     agendamento_escolhido = agendamentos[indice - 1]
@@ -188,26 +188,26 @@ def gerenciar_escolha_data(usuario_telefone: str, bot_telefone: str, mensagem_do
     conv.data["agendamento"].data_hora = agendamento_escolhido
 
     servicos = Service.objects.listar_servicos_por_nome()
-    enviar_mensagem(usuario_telefone, MensagemBOT.selecionar_servico(servicos), bot_telefone)
+    enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.selecionar_servico(servicos), bot_telefone)
     set_state(usuario_telefone, Status.AGUARDANDO_ESCOLHA_SERVICO)
 
 
 def gerenciar_escolha_servico(usuario_telefone: str, bot_telefone: str, mensagem_do_usuario: str) -> None:
     if not mensagem_do_usuario.isdigit():
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
         return
 
     indice = int(mensagem_do_usuario)
     numero_servicos_oferecidos = Service.objects.buscar_numero_de_servicos_oferecidos()
 
     if indice < 1 or indice > numero_servicos_oferecidos:
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
         return
 
     servico_escolhido = Service.objects.buscar_servico_por_id(indice)
     conv = get_conversation(usuario_telefone)
     conv.data["servico"] = servico_escolhido
-    enviar_mensagem(usuario_telefone, MensagemBOT.LOCAL_ATENDIMENTO, bot_telefone)
+    enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.LOCAL_ATENDIMENTO, bot_telefone)
     set_state(usuario_telefone, Status.LOCAL_ATENDIMENTO)
 
 
@@ -215,27 +215,27 @@ def gerenciar_local_atendimento(usuario_telefone: str, bot_telefone: str, mensag
     mensagem = mensagem_do_usuario.strip()
 
     if not mensagem_do_usuario.isdigit():
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
         return
 
     conv = get_conversation(usuario_telefone)
 
     if mensagem == "1":
-        enviar_mensagem(usuario_telefone, MensagemBOT.INFORMAR_ENDERECO, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.INFORMAR_ENDERECO, bot_telefone)
         set_state(usuario_telefone, Status.AGUARDANDO_ENDERECO)
 
     elif mensagem == "2":
         gerenciar_bot_confirmacao_agendamento(usuario_telefone, bot_telefone, endereco_padrao)
 
     else:
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
 
 
 def gerenciar_endereco(usuario_telefone: str, bot_telefone: str, mensagem_do_usuario: str) -> None:
     endereco = mensagem_do_usuario.strip()
 
     if not endereco:
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
         return
 
     gerenciar_bot_confirmacao_agendamento(usuario_telefone, bot_telefone, endereco)
@@ -246,11 +246,11 @@ def gerenciar_confirmacao_agendamento(usuario_telefone: str, bot_telefone: str, 
     mensagem = mensagem_do_usuario.strip()
 
     if not mensagem.isdigit():
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
         return
 
     if mensagem == "1":
-        enviar_mensagem(usuario_telefone, MensagemBOT.AGENDAMENTO_CONFIRMADO, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.AGENDAMENTO_CONFIRMADO, bot_telefone)
         set_state(usuario_telefone, Status.IDLE)
 
         conv = get_conversation(usuario_telefone)
@@ -273,21 +273,21 @@ def gerenciar_confirmacao_agendamento(usuario_telefone: str, bot_telefone: str, 
         )
 
         set_state(usuario_telefone, Status.IDLE)
-        enviar_mensagem(usuario_telefone, MensagemBOT.IDLE, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.IDLE, bot_telefone)
 
     elif mensagem == "2":
-        enviar_mensagem(usuario_telefone, MensagemBOT.CANCELAMENTO_CONFIRMADO, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.CANCELAMENTO_CONFIRMADO, bot_telefone)
         set_state(usuario_telefone, Status.IDLE)
-        enviar_mensagem(usuario_telefone, MensagemBOT.IDLE, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.IDLE, bot_telefone)
 
     else:
-        enviar_mensagem(usuario_telefone,MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
 
 def gerenciar_cancelamento(usuario_telefone: str, bot_telefone: str, mensagem_do_usuario: str) -> None:
     mensagem = mensagem_do_usuario.strip()
 
     if not mensagem.isdigit():
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
         return
 
     indice = int(mensagem)
@@ -296,14 +296,14 @@ def gerenciar_cancelamento(usuario_telefone: str, bot_telefone: str, mensagem_do
     agendamentos = conv.data.get("agendamentos", [])
 
     if indice < 1 or indice > len(agendamentos):
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
         return
 
     agendamento = agendamentos[indice - 1]
     conv.data["agendamento_para_cancelar"] = agendamento
 
     msg = MensagemBOT.confirmar_cancelamento(agendamento)
-    enviar_mensagem(usuario_telefone, msg, bot_telefone)
+    enviar_mensagem_via_whats(usuario_telefone, msg, bot_telefone)
     set_state(usuario_telefone, Status.CONFIRMANDO_CANCELAMENTO)
 
 
@@ -311,25 +311,25 @@ def gerenciar_confirmar_cancelamento(usuario_telefone: str, bot_telefone: str, m
     mensagem = mensagem_do_usuario.strip()
 
     if not mensagem_do_usuario.isdigit():
-        enviar_mensagem(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
         return
 
     conv = get_conversation(usuario_telefone)
     agendamento = conv.data.get("agendamento_para_cancelar")
 
     if mensagem == "1":
-        enviar_mensagem(usuario_telefone, MensagemBOT.CANCELAMENTO_CONFIRMADO, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.CANCELAMENTO_CONFIRMADO, bot_telefone)
         set_state(usuario_telefone, Status.IDLE)
         Appointment.objects.cancelar_agendamento(agendamento)
-        enviar_mensagem(usuario_telefone, MensagemBOT.IDLE, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.IDLE, bot_telefone)
 
     elif mensagem == "2":
-        enviar_mensagem(usuario_telefone, MensagemBOT.CANCELAMENTO_ABORTADO, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.CANCELAMENTO_ABORTADO, bot_telefone)
         set_state(usuario_telefone, Status.IDLE)
-        enviar_mensagem(usuario_telefone, MensagemBOT.IDLE, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.IDLE, bot_telefone)
 
     else:
-        enviar_mensagem(usuario_telefone,MensagemBOT.OPCAO_INVALIDA, bot_telefone)
+        enviar_mensagem_via_whats(usuario_telefone, MensagemBOT.OPCAO_INVALIDA, bot_telefone)
 
 
 def reset_conversation(phone: str):
@@ -345,7 +345,7 @@ def gerenciar_bot_confirmacao_agendamento(usuario_telefone: str, bot_telefone: s
     servico: Service = conv.data["servico"]
 
     msg = MensagemBOT.confirmar_agendamento(nome_usuario, agendamento, endereco_padrao, servico.name)
-    enviar_mensagem(usuario_telefone, msg, bot_telefone)
+    enviar_mensagem_via_whats(usuario_telefone, msg, bot_telefone)
     set_state(usuario_telefone, Status.CONFIRMANDO_AGENDAMENTO)
 
 def get_conversation(phone: str) -> Conversation:
