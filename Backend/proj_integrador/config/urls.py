@@ -24,6 +24,7 @@ urlpatterns = [
     path('agendar/', views.agendar, name='agendar'),
     path('admin/', admin.site.urls),
     path('', include('WhatsAppBot.urls')),
+    path('', include('TelegramBot.urls')),
     path('', include('Usuario.urls')),
     path('', include('servicos.urls')),
     path('', include('Agendamento.urls')),

@@ -3,7 +3,7 @@ import json
 from django.conf import settings
 from django.http import HttpResponseForbidden, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .engine import processar_mensagem
+from .engine import processar_mensagem_whatsapp
 
 
 def healthcheck():
@@ -41,7 +41,7 @@ def webhook(request):
                     message_data = value.get("messages", [{}])
                     for message in message_data:
                         message_text = message.get("text", {}).get("body", "")
-                        processar_mensagem(message_text, bot_telefone, usuario_telefone, nome_usuario)
+                        processar_mensagem_whatsapp(message_text, bot_telefone, usuario_telefone, nome_usuario)
 
             return JsonResponse({"status": "EVENT_RECEIVED"}, status=200)
 
