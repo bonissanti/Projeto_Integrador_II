@@ -43,8 +43,7 @@ def opcao_sair(conv: Conversation, usuario_telefone: str, sender: IMessageSender
     sender.enviar(usuario_telefone, MensagemBOT.SAIR)
     set_state(usuario_telefone, Status.SAIR)
 
-def set_state(phone: str, new_state: Status):
-    from WhatsAppBot.engine import get_conversation
+def set_state(user_id: str, new_state: Status) -> None:
+    from botCore.conversation_store import set_state as _set_state
 
-    conv = get_conversation(phone)
-    conv.state = new_state
+    _set_state(user_id, new_state)
