@@ -6,9 +6,10 @@ from django.test import TestCase
 from django.utils import timezone
 
 from Agendamento.models import Customer, Appointment, Service
-from .engine import processar_mensagem_whatsapp, get_conversation
+from botCore.conversation_store import get_conversation
+from .engine import processar_mensagem_whatsapp
 from botCore.bot_enums import Status
-from botCore.helper import conversations, MensagemBOT
+from botCore.helper import MensagemBOT
 
 MOCK_DATAS_DISPONIVEIS = [date.today() + timedelta(days=i) for i in range(1, 6)]
 PATCH_ENVIAR_ENGINE = 'WhatsAppBot.engine.enviar_mensagem'
@@ -45,7 +46,6 @@ class StateMachineIntegrationTest(TestCase):
     :type customer: Customer
     """
     def setUp(self):
-        conversations.clear()
         self.usuario_telefone = "+5511999999999"
         self.nome_usuario = "Test User"
         self.bot_telefone = "+5511888888888"
@@ -68,8 +68,7 @@ class StateMachineIntegrationTest(TestCase):
             }
         ])
 
-    def clear(self):
-        conversations.clear()
+    # def clear(self):
 
     @patch(PATCH_ENVIAR_UTILS)
     @patch(PATCH_ENVIAR_ENGINE)
