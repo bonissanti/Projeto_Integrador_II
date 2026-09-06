@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'Agendamento',
     'WhatsAppBot',
+    'TelegramBot',
     'Usuario',
     'servicos'
 ]
@@ -146,3 +147,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 WHATSAPP_VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
+
+# Usado para validar que os POSTs em /telegram/webhook vêm mesmo do
+# Telegram. Defina o mesmo valor ao chamar setWebhook com secret_token:
+# https://core.telegram.org/bots/api#setwebhook
+TELEGRAM_WEBHOOK_SECRET = os.getenv("TELEGRAM_WEBHOOK_SECRET")

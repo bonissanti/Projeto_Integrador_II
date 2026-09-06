@@ -25,7 +25,7 @@
       <excludeFolder url="file://$MODULE_DIR$/Backend/venv/include" />
       <excludeFolder url="file://$MODULE_DIR$/Backend/venv/lib" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.14 (ProjetoIntegradorI) (2)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="~/Documents/Univesp/Projeto_Integrador_II/.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TemplatesService">
