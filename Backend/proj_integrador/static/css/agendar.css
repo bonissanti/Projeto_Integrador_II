@@ -1,14 +1,4 @@
-:root {
-    --terra: #8B4513;
-    --caramelo: #C8874A;
-    --mel: #E8A96A;
-    --creme: #F5EAD7;
-    --areia: #EDD9B4;
-    --cacau: #3D1C08;
-    --branco-quente: #FBF5EC;
-    --erro: #c0392b;
-    --sucesso: #2d7a4f;
-}
+/* Palette variables now live in static/css/variables.css, loaded via base.html */
 
 *, *::before, *::after {
     box-sizing: border-box;

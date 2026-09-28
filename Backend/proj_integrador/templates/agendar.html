@@ -1,17 +1,14 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Agendar — Tatiane</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-      <link rel="stylesheet" href="{% static '../static/css/agendar.css' %}">
 
-</head>
-<body>
+{% block title %}Agendar — Tatiane{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/agendar.css' %}">
+{% endblock %}
+
+{% block content %}
+
   <div class="page-bg"></div>
 
   <nav>
@@ -24,173 +21,175 @@
     </a>
   </nav>
 
-<main>
-  <div class="left-panel">
-    <h1>Marque seu<br><em>horário</em></h1>
-    <p>Rápido e sem complicação. Informe seus dados e escolha a data perfeita.</p>
-    <div class="step-tracker">
-      <div class="track-item active" id="track-1">
-        <div class="track-dot" id="dot-1">1</div>
-        <div class="track-info"><div class="track-label">Etapa 1</div><div class="track-title">Identificação</div></div>
-      </div>
-      <div class="track-item" id="track-2">
-        <div class="track-dot" id="dot-2">2</div>
-        <div class="track-info"><div class="track-label">Etapa 2</div><div class="track-title">Serviço & Data</div></div>
-      </div>
-      <div class="track-item" id="track-3">
-        <div class="track-dot" id="dot-3">3</div>
-        <div class="track-info"><div class="track-label">Etapa 3</div><div class="track-title">Confirmação</div></div>
+  <main>
+    <div class="left-panel">
+      <h1>Marque seu<br><em>horário</em></h1>
+      <p>Rápido e sem complicação. Informe seus dados e escolha a data perfeita.</p>
+      <div class="step-tracker">
+        <div class="track-item active" id="track-1">
+          <div class="track-dot" id="dot-1">1</div>
+          <div class="track-info"><div class="track-label">Etapa 1</div><div class="track-title">Identificação</div></div>
+        </div>
+        <div class="track-item" id="track-2">
+          <div class="track-dot" id="dot-2">2</div>
+          <div class="track-info"><div class="track-label">Etapa 2</div><div class="track-title">Serviço & Data</div></div>
+        </div>
+        <div class="track-item" id="track-3">
+          <div class="track-dot" id="dot-3">3</div>
+          <div class="track-info"><div class="track-label">Etapa 3</div><div class="track-title">Confirmação</div></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="card">
-    <div class="card-top-bar"></div>
-    <div class="card-body">
+    <div class="card">
+      <div class="card-top-bar"></div>
+      <div class="card-body">
 
-      <!-- 1a: Email lookup -->
-      <div class="step-panel active" id="step-1a">
-        <span class="step-tag">✦ Etapa 1 de 3</span>
-        <h2 class="step-title">Para começar, informe seu <em>e-mail</em></h2>
-        <div class="alert alert-error" id="alert-1a"></div>
-        <div class="field">
-          <label for="email-lookup">E-mail</label>
-          <input type="email" id="email-lookup" placeholder="seu@email.com" autocomplete="email">
-          <div class="field-error" id="err-email-lookup">Informe um e-mail válido.</div>
-        </div>
-        <button class="btn-primary" id="btn-1a" onclick="checkEmail()">
-          <div class="btn-spinner"></div><span class="btn-label">Continuar →</span>
-        </button>
-      </div>
-
-      <!-- 1b: Novo cadastro -->
-      <div class="step-panel" id="step-1b">
-        <span class="step-tag">✦ Etapa 1 de 3</span>
-        <h2 class="step-title">Vimos que você <em>não tem cadastro</em></h2>
-        <p style="font-size:13px;color:rgba(61,28,8,.55);margin-bottom:22px;line-height:1.7;">Preencha seus dados para continuar com o agendamento.</p>
-        <div class="alert alert-error" id="alert-1b"></div>
-        <div class="field">
-          <label for="novo-nome">Nome completo</label>
-          <input type="text" id="novo-nome" placeholder="Ex: Maria Souza" autocomplete="name">
-          <div class="field-error" id="err-novo-nome">Informe seu nome completo.</div>
-        </div>
-        <div class="field">
-          <label for="novo-telefone">WhatsApp (11 dígitos)</label>
-          <input type="tel" id="novo-telefone" placeholder="11999999999" maxlength="11" autocomplete="tel">
-          <div class="field-error" id="err-novo-telefone">Informe um número com 11 dígitos.</div>
-        </div>
-        <button class="btn-primary" id="btn-1b" onclick="submitCadastro()">
-          <div class="btn-spinner"></div><span class="btn-label">Criar cadastro e continuar →</span>
-        </button>
-        <button class="btn-ghost" onclick="goToStep('1a')">← Usar outro e-mail</button>
-      </div>
-
-      <!-- 1c: Boas-vindas -->
-      <div class="step-panel" id="step-1c">
-        <span class="step-tag">✦ Etapa 1 de 3</span>
-        <h2 class="step-title">Bem-vinda de <em>volta!</em></h2>
-        <div class="alert alert-error" id="alert-1c"></div>
-        <div class="welcome-box">
-          <div class="wb-name" id="wb-name">—</div>
-          <div class="wb-row">📧 <span id="wb-email">—</span></div>
-          <div class="wb-row">📱 <span id="wb-phone">—</span></div>
-          <div class="wb-admin">Dados incorretos? Entre em contato com o <a href="mailto:tatiane@agendatrancista.com">administrador</a>.</div>
-        </div>
-        <button class="btn-primary" id="btn-1c" onclick="goToStep(2)">
-          <span class="btn-label">Continuar →</span>
-        </button>
-        <button class="btn-ghost" onclick="goToStep('1a')">← Usar outro e-mail</button>
-      </div>
-
-      <!-- Step 2: Serviço + Data + Local -->
-      <div class="step-panel" id="step-2">
-        <span class="step-tag">✦ Etapa 2 de 3</span>
-        <h2 class="step-title">Escolha o <em>serviço e a data</em></h2>
-        <div class="alert alert-error" id="alert-2"></div>
-
-        <div class="field" style="margin-bottom:22px;">
-          <label for="servico-select">Tipo de trança</label>
-          <div class="select-wrapper">
-            <select id="servico-select">
-              <option value="" disabled selected>Carregando serviços…</option>
-            </select>
+        <!-- 1a: Email lookup -->
+        <div class="step-panel active" id="step-1a">
+          <span class="step-tag">✦ Etapa 1 de 3</span>
+          <h2 class="step-title">Para começar, informe seu <em>e-mail</em></h2>
+          <div class="alert alert-error" id="alert-1a"></div>
+          <div class="field">
+            <label for="email-lookup">E-mail</label>
+            <input type="email" id="email-lookup" placeholder="seu@email.com" autocomplete="email">
+            <div class="field-error" id="err-email-lookup">Informe um e-mail válido.</div>
           </div>
-          <div class="field-error" id="err-servico">Selecione um serviço.</div>
+          <button class="btn-primary" id="btn-1a" onclick="checkEmail()">
+            <div class="btn-spinner"></div><span class="btn-label">Continuar →</span>
+          </button>
         </div>
 
-        <div style="margin-bottom:22px;">
-          <div class="calendar-label">Data disponível</div>
-          <div class="dates-grid" id="dates-grid">
-            <div class="dates-loading"><div class="spinner"></div>Buscando datas…</div>
+        <!-- 1b: Novo cadastro -->
+        <div class="step-panel" id="step-1b">
+          <span class="step-tag">✦ Etapa 1 de 3</span>
+          <h2 class="step-title">Vimos que você <em>não tem cadastro</em></h2>
+          <p style="font-size:13px;color:rgba(61,28,8,.55);margin-bottom:22px;line-height:1.7;">Preencha seus dados para continuar com o agendamento.</p>
+          <div class="alert alert-error" id="alert-1b"></div>
+          <div class="field">
+            <label for="novo-nome">Nome completo</label>
+            <input type="text" id="novo-nome" placeholder="Ex: Maria Souza" autocomplete="name">
+            <div class="field-error" id="err-novo-nome">Informe seu nome completo.</div>
           </div>
-          <div class="field-error" id="err-data" style="margin-top:-10px;margin-bottom:10px;">Selecione uma data.</div>
+          <div class="field">
+            <label for="novo-telefone">WhatsApp (11 dígitos)</label>
+            <input type="tel" id="novo-telefone" placeholder="11999999999" maxlength="11" autocomplete="tel">
+            <div class="field-error" id="err-novo-telefone">Informe um número com 11 dígitos.</div>
+          </div>
+          <button class="btn-primary" id="btn-1b" onclick="submitCadastro()">
+            <div class="btn-spinner"></div><span class="btn-label">Criar cadastro e continuar →</span>
+          </button>
+          <button class="btn-ghost" onclick="goToStep('1a')">← Usar outro e-mail</button>
         </div>
 
-        <div class="field">
-          <div class="calendar-label">Local de atendimento</div>
-          <div class="location-options">
-            <div class="loc-opt selected" id="loc-salao" onclick="selectLocation('salao')">
-              <span class="loc-icon">🏠</span>
-              <div class="loc-name">No salão</div>
-              <div class="loc-desc">Rua Nelson Tigrão, 15</div>
+        <!-- 1c: Boas-vindas -->
+        <div class="step-panel" id="step-1c">
+          <span class="step-tag">✦ Etapa 1 de 3</span>
+          <h2 class="step-title">Bem-vinda de <em>volta!</em></h2>
+          <div class="alert alert-error" id="alert-1c"></div>
+          <div class="welcome-box">
+            <div class="wb-name" id="wb-name">—</div>
+            <div class="wb-row">📧 <span id="wb-email">—</span></div>
+            <div class="wb-row">📱 <span id="wb-phone">—</span></div>
+            <div class="wb-admin">Dados incorretos? Entre em contato com o <a href="mailto:tatiane@agendatrancista.com">administrador</a>.</div>
+          </div>
+          <button class="btn-primary" id="btn-1c" onclick="goToStep(2)">
+            <span class="btn-label">Continuar →</span>
+          </button>
+          <button class="btn-ghost" onclick="goToStep('1a')">← Usar outro e-mail</button>
+        </div>
+
+        <!-- Step 2: Serviço + Data + Local -->
+        <div class="step-panel" id="step-2">
+          <span class="step-tag">✦ Etapa 2 de 3</span>
+          <h2 class="step-title">Escolha o <em>serviço e a data</em></h2>
+          <div class="alert alert-error" id="alert-2"></div>
+
+          <div class="field" style="margin-bottom:22px;">
+            <label for="servico-select">Tipo de trança</label>
+            <div class="select-wrapper">
+              <select id="servico-select">
+                <option value="" disabled selected>Carregando serviços…</option>
+              </select>
             </div>
-            <div class="loc-opt" id="loc-domicilio" onclick="selectLocation('domicilio')">
-              <span class="loc-icon">📍</span>
-              <div class="loc-name">Em casa</div>
-              <div class="loc-desc">Taxa adicional</div>
+            <div class="field-error" id="err-servico">Selecione um serviço.</div>
+          </div>
+
+          <div style="margin-bottom:22px;">
+            <div class="calendar-label">Data disponível</div>
+            <div class="dates-grid" id="dates-grid">
+              <div class="dates-loading"><div class="spinner"></div>Buscando datas…</div>
+            </div>
+            <div class="field-error" id="err-data" style="margin-top:-10px;margin-bottom:10px;">Selecione uma data.</div>
+          </div>
+
+          <div class="field">
+            <div class="calendar-label">Local de atendimento</div>
+            <div class="location-options">
+              <div class="loc-opt selected" id="loc-salao" onclick="selectLocation('salao')">
+                <span class="loc-icon">🏠</span>
+                <div class="loc-name">No salão</div>
+                <div class="loc-desc">Rua Nelson Tigrão, 15</div>
+              </div>
+              <div class="loc-opt" id="loc-domicilio" onclick="selectLocation('domicilio')">
+                <span class="loc-icon">📍</span>
+                <div class="loc-name">Em casa</div>
+                <div class="loc-desc">Taxa adicional</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="field" id="field-endereco">
-          <label for="endereco">Endereço completo</label>
-          <input type="text" id="endereco" placeholder="Rua, número, bairro, CEP">
-          <div class="field-error" id="err-endereco">Informe seu endereço.</div>
-        </div>
-
-        <button class="btn-primary" id="btn-2" onclick="irParaConfirmacao()">
-          <div class="btn-spinner"></div><span class="btn-label">Revisar agendamento →</span>
-        </button>
-        <button class="btn-ghost" onclick="voltarStep1()">← Voltar</button>
-      </div>
-
-      <!-- Step 3: Confirmação -->
-      <div class="step-panel" id="step-3">
-        <span class="step-tag">✦ Tudo certinho?</span>
-        <h2 class="step-title">Confirme seu <em>agendamento</em></h2>
-        <div class="alert alert-error" id="alert-3"></div>
-        <div class="summary-box">
-          <div class="summary-row"><span class="summary-icon">👤</span><div><div class="summary-key">Cliente</div><div class="summary-val" id="sum-nome">—</div></div></div>
-          <div class="summary-row"><span class="summary-icon">✂️</span><div><div class="summary-key">Serviço</div><div class="summary-val" id="sum-servico">—</div></div></div>
-          <div class="summary-row"><span class="summary-icon">📅</span><div><div class="summary-key">Data</div><div class="summary-val" id="sum-data">—</div></div></div>
-          <div class="summary-row"><span class="summary-icon">🕐</span><div><div class="summary-key">Horário</div><div class="summary-val">11:00</div></div></div>
-          <div class="summary-row"><span class="summary-icon">🏠</span><div><div class="summary-key">Local</div><div class="summary-val" id="sum-local">—</div></div></div>
-        </div>
-        <button class="btn-primary" id="btn-3" onclick="confirmarAgendamento()">
-          <div class="btn-spinner"></div><span class="btn-label">✓ Confirmar agendamento</span>
-        </button>
-        <button class="btn-ghost" onclick="goToStep(2)">← Voltar</button>
-      </div>
-
-      <!-- Success -->
-      <div class="step-panel" id="step-success">
-        <div class="success-screen">
-          <div class="success-circle">✓</div>
-          <h2 class="success-title">Agendado!</h2>
-{#          <p class="success-desc">Seu horário foi confirmado.<br>A Tatiane vai entrar em contato pelo WhatsApp em breve. 💫</p>#}
-          <div class="summary-box" style="text-align:left;margin-bottom:28px;">
-            <div class="summary-row"><span class="summary-icon">✂️</span><div><div class="summary-key">Serviço</div><div class="summary-val" id="sum-servico-final">—</div></div></div>
-            <div class="summary-row"><span class="summary-icon">📅</span><div><div class="summary-key">Data</div><div class="summary-val" id="sum-data-final">—</div></div></div>
-            <div class="summary-row"><span class="summary-icon">🏠</span><div><div class="summary-key">Local</div><div class="summary-val" id="sum-local-final">—</div></div></div>
+          <div class="field" id="field-endereco">
+            <label for="endereco">Endereço completo</label>
+            <input type="text" id="endereco" placeholder="Rua, número, bairro, CEP">
+            <div class="field-error" id="err-endereco">Informe seu endereço.</div>
           </div>
-          <a href="{% url 'home' %}" style="display:block;text-decoration:none;text-align:center;padding:15px;background:var(--terra);color:var(--branco-quente);border-radius:3px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;letter-spacing:.06em;">Voltar à página inicial</a>
-        </div>
-      </div>
 
+          <button class="btn-primary" id="btn-2" onclick="irParaConfirmacao()">
+            <div class="btn-spinner"></div><span class="btn-label">Revisar agendamento →</span>
+          </button>
+          <button class="btn-ghost" onclick="voltarStep1()">← Voltar</button>
+        </div>
+
+        <!-- Step 3: Confirmação -->
+        <div class="step-panel" id="step-3">
+          <span class="step-tag">✦ Tudo certinho?</span>
+          <h2 class="step-title">Confirme seu <em>agendamento</em></h2>
+          <div class="alert alert-error" id="alert-3"></div>
+          <div class="summary-box">
+            <div class="summary-row"><span class="summary-icon">👤</span><div><div class="summary-key">Cliente</div><div class="summary-val" id="sum-nome">—</div></div></div>
+            <div class="summary-row"><span class="summary-icon">✂️</span><div><div class="summary-key">Serviço</div><div class="summary-val" id="sum-servico">—</div></div></div>
+            <div class="summary-row"><span class="summary-icon">📅</span><div><div class="summary-key">Data</div><div class="summary-val" id="sum-data">—</div></div></div>
+            <div class="summary-row"><span class="summary-icon">🕐</span><div><div class="summary-key">Horário</div><div class="summary-val">11:00</div></div></div>
+            <div class="summary-row"><span class="summary-icon">🏠</span><div><div class="summary-key">Local</div><div class="summary-val" id="sum-local">—</div></div></div>
+          </div>
+          <button class="btn-primary" id="btn-3" onclick="confirmarAgendamento()">
+            <div class="btn-spinner"></div><span class="btn-label">✓ Confirmar agendamento</span>
+          </button>
+          <button class="btn-ghost" onclick="goToStep(2)">← Voltar</button>
+        </div>
+
+        <!-- Success -->
+        <div class="step-panel" id="step-success">
+          <div class="success-screen">
+            <div class="success-circle">✓</div>
+            <h2 class="success-title">Agendado!</h2>
+            <div class="summary-box" style="text-align:left;margin-bottom:28px;">
+              <div class="summary-row"><span class="summary-icon">✂️</span><div><div class="summary-key">Serviço</div><div class="summary-val" id="sum-servico-final">—</div></div></div>
+              <div class="summary-row"><span class="summary-icon">📅</span><div><div class="summary-key">Data</div><div class="summary-val" id="sum-data-final">—</div></div></div>
+              <div class="summary-row"><span class="summary-icon">🏠</span><div><div class="summary-key">Local</div><div class="summary-val" id="sum-local-final">—</div></div></div>
+            </div>
+            <a href="{% url 'home' %}" style="display:block;text-decoration:none;text-align:center;padding:15px;background:var(--terra);color:var(--branco-quente);border-radius:3px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;letter-spacing:.06em;">Voltar à página inicial</a>
+          </div>
+        </div>
+
+      </div>
     </div>
-  </div>
-</main>
-    <script> globalThis.API_BASE_URL = "{{ API_BASE_URL }}";</script>
-    <script src="{% static '../static/js/agendar.js' %}"></script>
-</body>
-</html>
+  </main>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script> globalThis.API_BASE_URL = "{{ API_BASE_URL }}";</script>
+  <script src="{% static 'js/agendar.js' %}"></script>
+{% endblock %}

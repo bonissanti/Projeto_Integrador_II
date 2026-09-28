@@ -1,16 +1,13 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-      <title>Tatiane — Agendamento</title>
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-      <link rel="stylesheet" href="{% static '../static/css/home.css' %}">
-</head>
-<body>
+
+{% block title %}Tatiane — Agendamento{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
 
   <!-- HERO -->
   <section class="hero">
@@ -51,28 +48,21 @@
       </div>
     </div>
 
-      <div class="scroll-hint">
-        <div class="scroll-line"></div>
-        <span>Rolar</span>
-      </div>
+    <div class="hero-right">
+      <img
+        src="{% static 'images/pretty-young-black-woman-wear-summer-dress-pose-sunflower-field.jpg' %}"
+        alt="Tranças estilosas em campo de girassóis"
+        class="hero-right-image"
+      >
     </div>
 
-        <div class="hero-right">
-          <img
-            src="{% static '../static/images/pretty-young-black-woman-wear-summer-dress-pose-sunflower-field.jpg' %}"
-            alt="Tranças estilosas em campo de girassóis"
-            class="hero-right-image"
-          >
-        </div>
-
-      <!-- Decorative dots grid -->
-      <svg style="position:absolute;bottom:40px;left:40px;opacity:0.15;" width="100" height="100" viewBox="0 0 100 100">
-        <defs><pattern id="dots" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
-          <circle cx="2" cy="2" r="1.5" fill="#8B4513"/>
-        </pattern></defs>
-        <rect width="100" height="100" fill="url(#dots)"/>
-      </svg>
-    </div>
+    <!-- Decorative dots grid -->
+    <svg style="position:absolute;bottom:40px;left:40px;opacity:0.15;" width="100" height="100" viewBox="0 0 100 100">
+      <defs><pattern id="dots" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="1.5" fill="#8B4513"/>
+      </pattern></defs>
+      <rect width="100" height="100" fill="url(#dots)"/>
+    </svg>
   </section>
 
   <!-- SERVIÇOS -->
@@ -210,14 +200,17 @@
     </div>
   </section>
 
-    <!-- FOOTER -->
-    <footer>
+  <!-- FOOTER -->
+  <footer>
     <div class="footer-brand">Tatiane</div>
     <div class="footer-info">
       Vila Missionária, São Paulo — SP<br>
       Rua Nelson Tigrão, 15 · CEP 04430-165
     </div>
-    </footer>
-    <script src="{% static '../static/js/home.js' %}"></script>
-</body>
-</html>
+  </footer>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/home.js' %}"></script>
+{% endblock %}
