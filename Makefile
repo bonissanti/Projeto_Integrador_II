@@ -70,7 +70,7 @@ init-env:
 		echo "Arquivo .env criado. Ajuste VERIFY_TOKEN com o token do WhatsApp Cloud API."; \
 	fi
 
-setup: install init-env inserir-servicos
+setup: install init-env migrate inserir-servicos
 	@echo ""
 	@echo "Configuracao concluida!"
 	@echo ""
