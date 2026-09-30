@@ -1,0 +1,26 @@
+/*
+  variables.css
+  Single source of truth for the color palette.
+  Loaded once in base.html — do NOT redefine :root in page-specific CSS files.
+*/
+:root {
+  --terra: #8B4513;
+  --caramelo: #C8874A;
+  --mel: #E8A96A;
+  --creme: #F5EAD7;
+  --areia: #EDD9B4;
+  --cacau: #3D1C08;
+  --ouro: #C9943A;
+  --branco-quente: #FBF5EC;
+  --erro: #c0392b;
+  --sucesso: #2d7a4f;
+
+  /* Muted text tokens: your original CSS used one-off rgba() values
+     (e.g. rgba(251,245,236,.35), rgba(61,28,8,.4)) scattered across files
+     for "faded" text. Centralizing them here means a11y.css can override
+     ALL of them in one place instead of hunting through every rgba(). */
+  --text-muted-on-dark: rgba(251, 245, 236, 0.55);
+  --text-faint-on-dark: rgba(251, 245, 236, 0.35);
+  --text-muted-on-light: rgba(61, 28, 8, 0.55);
+  --text-faint-on-light: rgba(61, 28, 8, 0.4);
+}

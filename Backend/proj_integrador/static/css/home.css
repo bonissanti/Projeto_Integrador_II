@@ -230,7 +230,7 @@ body::before {
   overflow: hidden;
 }
 
-.btn-whatsapp {
+.btn-telegram {
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -254,7 +254,7 @@ body::before {
     transition: all 0.3s ease-in-out;
 }
 
-.btn-whatsapp:hover {
+.btn-telegram:hover {
     background: white;
     opacity: 0.8;
 }

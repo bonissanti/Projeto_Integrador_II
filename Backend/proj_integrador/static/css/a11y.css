@@ -1,0 +1,216 @@
+/*
+  a11y.css
+  Accessibility styles, loaded on every page via base.html.
+  Currently: high-contrast toggle. Add future a11y features here
+  (e.g. font-size scaling, reduced motion) so they all live in one file.
+*/
+
+/* ── High contrast palette ──
+   Applied when <body> has class="high-contrast" (set by a11y.js).
+   Targets both the named variables AND the raw rgba() patterns used
+   throughout home.css/agendar.css for muted/faded text, since those
+   don't route through variables today. */
+body.high-contrast {
+  --terra: #FFD400;
+  --caramelo: #FFD400;
+  --mel: #FFEA70;
+  --creme: #1a1a1a;
+  --areia: #2a2a2a;
+  --cacau: #000000;
+  --ouro: #FFD400;
+  --branco-quente: #ffffff;
+  --erro: #ff6b6b;
+  --sucesso: #4ade80;
+
+  --text-muted-on-dark: #ffffff;
+  --text-faint-on-dark: #e6e6e6;
+  --text-muted-on-light: #000000;
+  --text-faint-on-light: #1a1a1a;
+
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Backgrounds that were pale/cream become solid black; anything that was
+   near-black stays black. This keeps the dark-panel / light-card structure
+   of the layout but pushes every ratio to AAA-range. */
+body.high-contrast .hero-right,
+body.high-contrast .services,
+body.high-contrast .testimonials,
+body.high-contrast .card,
+body.high-contrast .card-body,
+body.high-contrast .service-card,
+body.high-contrast .testimonial,
+body.high-contrast input,
+body.high-contrast select,
+body.high-contrast .date-chip,
+body.high-contrast .loc-opt,
+body.high-contrast .welcome-box,
+body.high-contrast .summary-box {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+body.high-contrast .hero-left,
+body.high-contrast .how,
+body.high-contrast .cta-section,
+body.high-contrast footer,
+body.high-contrast nav,
+body.high-contrast .page-bg {
+  background: #000000 !important;
+  background-image: none !important;
+}
+
+/* Remove decorative low-opacity overlays/noise — they add nothing and
+   can reduce effective contrast. */
+body.high-contrast body::before,
+body.high-contrast .hero-right::before,
+body.high-contrast .page-bg::after,
+body.high-contrast .cta-section::before,
+body.high-contrast .service-number,
+body.high-contrast .testimonial::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* All text: force solid white or solid black depending on region, killing
+   every translucent rgba() text color in one sweep. */
+body.high-contrast * {
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+body.high-contrast .hero-title,
+body.high-contrast .hero-subtitle,
+body.high-contrast .hero-desc,
+body.high-contrast .step-title,
+body.high-contrast .step-desc,
+body.high-contrast .section-title,
+body.high-contrast .footer-info,
+body.high-contrast .footer-brand,
+body.high-contrast .track-title,
+body.high-contrast .track-label,
+body.high-contrast .scroll-hint,
+body.high-contrast .left-panel p,
+body.high-contrast .left-panel h1 {
+  color: #ffffff !important;
+}
+
+body.high-contrast .service-name,
+body.high-contrast .service-desc,
+body.high-contrast .section-title:not(.how .section-title):not(.cta-section .section-title),
+body.high-contrast .testimonial-text,
+body.high-contrast .testimonial-author,
+body.high-contrast .step-title,
+body.high-contrast label,
+body.high-contrast .wb-row,
+body.high-contrast .summary-key,
+body.high-contrast .summary-val,
+body.high-contrast .calendar-label,
+body.high-contrast .chip-weekday,
+body.high-contrast .chip-month,
+body.high-contrast .loc-name,
+body.high-contrast .loc-desc {
+  color: #ffffff !important;
+}
+
+/* Links and CTAs get a single, unmistakable accent: bright yellow, which
+   is the classic high-contrast pairing against pure black (21:1 ratio). */
+body.high-contrast a,
+body.high-contrast .btn-agendar,
+body.high-contrast .btn-primary,
+body.high-contrast .cta-section .btn-agendar {
+  background-color: #FFD400 !important;
+  color: #000000 !important;
+  border: 2px solid #ffffff !important;
+}
+
+body.high-contrast .btn-telegram,
+body.high-contrast .btn-ghost,
+body.high-contrast .btn-secondary,
+body.high-contrast .nav-back,
+body.high-contrast .nav-brand {
+  background: #000000 !important;
+  color: #FFD400 !important;
+  border: 2px solid #FFD400 !important;
+}
+
+body.high-contrast .date-chip.selected,
+body.high-contrast .loc-opt.selected,
+body.high-contrast .track-item.active .track-dot,
+body.high-contrast .track-item.done .track-dot,
+body.high-contrast .step-dot {
+  background-color: #FFD400 !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+}
+
+body.high-contrast .success-circle {
+  background: #FFD400 !important;
+  color: #000000 !important;
+}
+
+body.high-contrast input:focus,
+body.high-contrast select:focus,
+body.high-contrast a:focus,
+body.high-contrast button:focus {
+  outline: 3px solid #FFD400 !important;
+  outline-offset: 2px;
+  box-shadow: none !important;
+}
+
+/* ── Toggle button itself ── */
+.a11y-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  background: #000000;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  border-radius: 30px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.a11y-toggle:hover {
+  transform: translateY(-2px);
+  background: #1a1a1a;
+}
+
+.a11y-toggle:focus-visible {
+  outline: 3px solid #FFD400;
+  outline-offset: 2px;
+}
+
+.a11y-toggle svg {
+  flex-shrink: 0;
+}
+
+body.high-contrast .a11y-toggle {
+  background: #FFD400 !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+}
+
+@media (max-width: 640px) {
+  .a11y-toggle {
+    bottom: 16px;
+    right: 16px;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+  .a11y-toggle span {
+    display: none;
+  }
+}
