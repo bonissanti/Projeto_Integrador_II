@@ -39,6 +39,7 @@ def processar_mensagem(mensagem_do_usuario: str, usuario_telefone: str, nome_usu
             "servico": None,
         }
 
+    print("Acessando state machine do bot")
     match conv.state:
         case Status.INICIAL:
             gerenciar_status_inicial(usuario_telefone, sender)
