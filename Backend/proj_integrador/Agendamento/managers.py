@@ -2,7 +2,9 @@ from datetime import datetime, timedelta, time
 
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
-from django.db import models
+from django.db import models, transaction
+from decimal import Decimal
+from django.core.exceptions import ValidationError
 
 
 class CustomerManager(models.Manager):
@@ -85,7 +87,7 @@ class AppointmentsManager(models.Manager):
 
     def marcar_agendamento(self, customer: 'Customer', scheduled_at: datetime, location: str,
                            services: list['Service']) -> 'Appointment':
-        from .models import AppointmentxService
+        from .models import AppointmentxService, HairStock
 
         if timezone.is_naive(scheduled_at):
             scheduled_at = timezone.make_aware(scheduled_at, timezone.get_current_timezone())
@@ -103,6 +105,17 @@ class AppointmentsManager(models.Manager):
                 service=service,
                 applied_price=service.price,
             )
+
+            for consumo in service.hair_stock_usages.all():
+                try:
+                    HairStock.objects.registrar_saida(
+                        consumo.hair_stock_id,
+                        consumo.quantity,
+                        appointment=appointment,
+                        note=f'Consumo automático do agendamento #{appointment.id} ({service.name})',
+                    )
+                except ValidationError as e:
+                    print(f'Erro ao debitar estoque de cabelo para "{service.name}": {e}')
 
         return appointment
 
@@ -137,3 +150,80 @@ class ServiceManager(models.Manager):
 
     def buscar_servico_por_id(self, id: int) -> 'Service | None':
         return self.filter(id=id).first()
+
+
+class HairStockManager(models.Manager):
+
+    def listar_ativos(self):
+        return self.filter(deleted=False)
+
+    @transaction.atomic
+    def registrar_entrada(self, hair_stock_id, quantity, unit_price=None, note=''):
+        """
+        Repõe estoque. Se unit_price for informado, também atualiza o
+        preço de referência do HairStock (preço pode mudar entre compras).
+        """
+        from .models import HairMovement  # import local evita ciclo com models.py
+
+        quantity = Decimal(str(quantity))
+        if quantity <= 0:
+            raise ValidationError('Quantidade de entrada deve ser positiva.')
+
+        hair_stock = self.select_for_update().get(id=hair_stock_id, deleted=False)
+        preco_usado = unit_price if unit_price is not None else hair_stock.unit_price
+
+        HairMovement.objects.create(
+            hair_stock=hair_stock,
+            movement_type='entrada',
+            quantity=quantity,
+            unit_price_at_time=preco_usado,
+            note=note,
+        )
+
+        hair_stock.quantity_on_hand += quantity
+        if unit_price is not None:
+            hair_stock.unit_price = unit_price
+        hair_stock.save(update_fields=['quantity_on_hand', 'unit_price'])
+
+        return hair_stock
+
+    @transaction.atomic
+    def registrar_saida(self, hair_stock_id, quantity, appointment=None, note=''):
+        """
+        Consome estoque. Levanta ValidationError se não houver saldo
+        suficiente — não permite estoque negativo.
+        """
+        from .models import HairMovement  # import local evita ciclo com models.py
+
+        quantity = Decimal(str(quantity))
+        if quantity <= 0:
+            raise ValidationError('Quantidade de saída deve ser positiva.')
+
+        hair_stock = self.select_for_update().get(id=hair_stock_id, deleted=False)
+
+        if hair_stock.quantity_on_hand < quantity:
+            raise ValidationError(
+                f'Estoque insuficiente de "{hair_stock.name}": '
+                f'disponível {hair_stock.quantity_on_hand}, solicitado {quantity}.'
+            )
+
+        HairMovement.objects.create(
+            hair_stock=hair_stock,
+            movement_type='saida',
+            quantity=quantity,
+            unit_price_at_time=hair_stock.unit_price,
+            appointment=appointment,
+            note=note,
+        )
+
+        hair_stock.quantity_on_hand -= quantity
+        hair_stock.save(update_fields=['quantity_on_hand'])
+
+        if hair_stock.is_low_stock:
+            from .notifications import notificar_estoque_baixo
+            transaction.on_commit(lambda: notificar_estoque_baixo(hair_stock))
+
+        return hair_stock
+
+    def baixo_estoque(self):
+        return self.filter(deleted=False, quantity_on_hand__lte=models.F('minimum_stock'))

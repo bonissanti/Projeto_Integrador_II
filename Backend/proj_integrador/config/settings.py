@@ -152,3 +152,7 @@ WHATSAPP_VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
 # Telegram. Defina o mesmo valor ao chamar setWebhook com secret_token:
 # https://core.telegram.org/bots/api#setwebhook
 TELEGRAM_WEBHOOK_SECRET = os.getenv("TELEGRAM_WEBHOOK_SECRET")
+
+# chat_id do Telegram da Tati (trancista), usado para notificações
+# administrativas como alerta de estoque de cabelo baixo.
+TELEGRAM_ADMIN_CHAT_ID = os.getenv("TELEGRAM_ADMIN_CHAT_ID")
