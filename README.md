@@ -160,6 +160,25 @@ make test             # Roda a suite completa (21 testes)
 make check            # Verifica a configuração do Django
 ```
 
+## ♿ Acessibilidade
+
+As páginas públicas usam landmarks HTML, títulos hierárquicos, atalho para o conteúdo principal e rótulos associados aos campos. No agendamento, datas e locais são controles nativos de rádio: podem ser operados pelo teclado e anunciados por leitores de tela. Mudanças de etapa levam o foco ao título correspondente, e erros de campo são relacionados ao controle que precisa de correção. O botão de alto contraste e a preferência por movimento reduzido também estão disponíveis.
+
+A leitura é fornecida pelo leitor de tela do sistema/navegador; o site não instala um leitor próprio. Para executar os testes automatizados de estrutura e dos nomes/relacionamentos expostos às tecnologias assistivas:
+
+```bash
+cd Backend/proj_integrador
+python manage.py test Agendamento.tests.test_accessibility
+```
+
+Os testes automatizados não substituem a validação com um leitor de tela real. Com o site aberto, ative o NVDA no Windows, o VoiceOver no macOS/iOS ou o TalkBack no Android e valide este fluxo:
+
+1. Use `Tab` até o link “Pular para o conteúdo principal” e pressione `Enter`; confirme que o foco vai para o conteúdo principal. Navegue também por títulos e landmarks e confirme que são anunciados com nomes compreensíveis.
+2. Abra o agendamento e percorra os campos com `Tab`; confirme que cada controle é anunciado com seu rótulo e que apenas a etapa ativa fica disponível.
+3. Avance até a escolha de data. Confirme que cada data é anunciada por extenso como opção de rádio; use as setas para mudar a seleção e confira que o leitor anuncia a nova opção selecionada. Faça o mesmo com as opções de local.
+4. Tente avançar sem preencher um campo obrigatório; confirme que o foco vai para o campo inválido e que o erro é anunciado. Ao avançar de etapa, confirme que o título da nova etapa recebe foco.
+5. Conclua o fluxo e confirme que o título de sucesso e o resumo do agendamento são lidos em ordem.
+
 ---
 
 ## 📁 Estrutura
