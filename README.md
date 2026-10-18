@@ -10,7 +10,8 @@ Os clientes fazem agendamentos via **bot do WhatsApp**; ao confirmar, o agendame
 
 - **Python 3.10+** — linguagem (compatível com Django 6)
 - **Django 6.0** — framework web
-- **SQLite** — banco de dados (desenvolvimento)
+- **SQLite** — banco de dados local (padrão)
+- **PostgreSQL** — banco persistente para produção no Render, via `DATABASE_URL`
 - **Google Calendar API** — integração de eventos
 - **WhatsApp Cloud API** — webhook do bot
 - **uv** — gerenciador de pacotes
@@ -52,8 +53,11 @@ Depois, edite o `.env` e ajuste o `VERIFY_TOKEN` com o token do seu WhatsApp Clo
 
 ```dotenv
 SECRET_KEY=<gerado-automaticamente>
+DEBUG=True
 VERIFY_TOKEN=seu-token-do-whatsapp-webhook
 ```
+
+O SQLite é usado localmente quando `DATABASE_URL` não está definida. Em produção, basta configurar `DATABASE_URL` com a URL completa de conexão do PostgreSQL. Ela já contém host, porta, nome do banco e credenciais, então não é preciso preencher cada configuração separadamente. Não coloque essa URL nem credenciais no código ou no Git.
 
 ### 3. Ative o ambiente e prepare o banco
 
@@ -121,6 +125,31 @@ TIME_ZONE = 'America/Sao_Paulo'
 - O horário padrão que o bot sugere (11:00) é interpretado como 11:00 no fuso configurado — não como UTC.
 
 Para trocar de fuso no futuro (ex.: profissional viaja), altere apenas `TIME_ZONE` em `settings.py`. A integração com o Google Calendar segue junto.
+
+---
+
+## ☁️ Persistência no Render com PostgreSQL
+
+O código mantém SQLite para desenvolvimento local e usa PostgreSQL quando `DATABASE_URL` está configurada. Para conectar o Web Service existente:
+
+1. Crie um banco PostgreSQL no Render, de preferência na mesma região do Web Service.
+2. No Web Service, adicione `DATABASE_URL` com a **Internal Database URL** fornecida pelo banco. Isso não exige substituir nem recriar o Web Service.
+3. Confirme `SECRET_KEY` nas variáveis de ambiente e defina `DEBUG=False`. O Render fornece `RENDER_EXTERNAL_HOSTNAME`; o Django usa esse hostname automaticamente para hosts permitidos e origem CSRF. Se usar um domínio personalizado, adicione-o em `ALLOWED_HOSTS` e `CSRF_TRUSTED_ORIGINS` como valores separados por vírgula. O proxy HTTPS do Render é reconhecido, o redirecionamento para HTTPS é ativado no Render quando `DEBUG=False` e os cookies de sessão/CSRF são marcados como seguros em produção.
+4. Configure o Web Service para instalar dependências e servir a aplicação com Gunicorn. Para um serviço Python com a raiz deste repositório como diretório:
+
+   **Build Command**
+   ```bash
+   pip install -r requirements.txt && cd Backend/proj_integrador && python manage.py collectstatic --noinput
+   ```
+
+   **Start Command**
+   ```bash
+   cd Backend/proj_integrador && python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+   ```
+
+   O comando de inicialização aplica as migrações no PostgreSQL antes de iniciar a aplicação. Não execute `makemigrations` no deploy: as migrações versionadas no repositório são aplicadas com `migrate`. A migração cria/atualiza o esquema, mas **não transfere registros** de um SQLite anterior; se já houver dados de produção que precisem ser preservados, exporte-os e importe-os para o PostgreSQL antes de trocar o serviço.
+
+Quando `DATABASE_URL` não estiver definida, a aplicação continua usando `Backend/proj_integrador/db.sqlite3`. O Render Web Service não deve depender desse arquivo local para persistência; para produção, conecte o PostgreSQL e confirme nos logs que `migrate` e Gunicorn iniciaram sem erros.
 
 ---
 
