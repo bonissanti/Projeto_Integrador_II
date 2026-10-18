@@ -6,8 +6,16 @@
     padding: 0;
 }
 
+.date-fieldset {
+    margin-bottom: 22px;
+}
+
 html {
     scroll-behavior: smooth;
+}
+
+[hidden] {
+    display: none !important;
 }
 
 body {
@@ -112,6 +120,8 @@ main {
 .step-tracker {
     display: flex;
     flex-direction: column;
+    list-style: none;
+    padding: 0;
 }
 
 .track-item {
@@ -228,6 +238,10 @@ main {
 .step-panel.active {
     display: block;
     animation: fadeUp .4s ease both;
+}
+
+.service-field {
+    margin-bottom: 22px;
 }
 
 .step-tag {
@@ -380,7 +394,32 @@ input.input-error, select.input-error {
     margin-bottom: 22px;
 }
 
+.date-fieldset,
+.location-fieldset {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+}
+
+.date-option {
+    min-width: 0;
+}
+
+.date-radio,
+.location-radio {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .date-chip {
+    display: block;
     padding: 9px 4px;
     background: var(--creme);
     border: 1.5px solid var(--areia);
@@ -399,6 +438,23 @@ input.input-error, select.input-error {
 .date-chip.selected {
     background: var(--terra);
     border-color: var(--terra);
+    color: var(--branco-quente);
+}
+
+.date-radio:focus-visible + .date-chip,
+.location-radio:focus-visible + .loc-opt {
+    outline: 3px solid #9a4d12;
+    outline-offset: 3px;
+}
+
+.date-radio:checked + .date-chip,
+.location-radio:checked + .loc-opt {
+    border-color: var(--terra);
+    background: rgba(139, 69, 19, .07);
+}
+
+.date-radio:checked + .date-chip {
+    background: var(--terra);
     color: var(--branco-quente);
 }
 
@@ -496,14 +552,6 @@ input.input-error, select.input-error {
     color: rgba(61, 28, 8, .45);
 }
 
-#field-endereco {
-    display: none;
-}
-
-#field-endereco.visible {
-    display: block;
-}
-
 .summary-box {
     background: var(--creme);
     border: 1.5px solid var(--areia);
@@ -518,6 +566,15 @@ input.input-error, select.input-error {
     gap: 12px;
     padding: 9px 0;
     border-bottom: 1px solid var(--areia);
+}
+
+.summary-row > div {
+    min-width: 0;
+}
+
+.summary-row dt,
+.summary-row dd {
+    margin: 0;
 }
 
 .summary-row:last-child {
@@ -612,10 +669,6 @@ input.input-error, select.input-error {
 }
 
 .btn-primary:disabled::before {
-    display: none;
-}
-
-.btn-loading .btn-label {
     display: none;
 }
 

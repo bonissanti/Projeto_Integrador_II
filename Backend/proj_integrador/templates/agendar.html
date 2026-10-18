@@ -11,61 +11,62 @@
 
   <div class="page-bg"></div>
 
-  <nav>
-    <a class="nav-brand" href="{% url 'home' %}">Tatiane</a>
-    <a class="nav-back" href="{% url 'home' %}">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M19 12H5M5 12l7-7M5 12l7 7"/>
-      </svg>
-      Voltar ao início
-    </a>
-  </nav>
+  <header>
+    <nav aria-label="Navegação principal">
+      <a class="nav-brand" href="{% url 'home' %}">Tatiane</a>
+      <a class="nav-back" href="{% url 'home' %}">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M5 12l7-7M5 12l7 7"/>
+        </svg>
+        Voltar ao início
+      </a>
+    </nav>
+  </header>
 
-  <main>
+  <main id="main-content" tabindex="-1">
     <div class="left-panel">
-      <h1>Marque seu<br><em>horário</em></h1>
+      <h1 id="booking-title">Marque seu<br><em>horário</em></h1>
       <p>Rápido e sem complicação. Informe seus dados e escolha a data perfeita.</p>
-      <div class="step-tracker">
-        <div class="track-item active" id="track-1">
-          <div class="track-dot" id="dot-1">1</div>
+      <ol class="step-tracker" aria-label="Etapas do agendamento">
+        <li class="track-item active" id="track-1">
+          <div class="track-dot" id="dot-1" aria-hidden="true">1</div>
           <div class="track-info"><div class="track-label">Etapa 1</div><div class="track-title">Identificação</div></div>
-        </div>
-        <div class="track-item" id="track-2">
-          <div class="track-dot" id="dot-2">2</div>
+        </li>
+        <li class="track-item" id="track-2">
+          <div class="track-dot" id="dot-2" aria-hidden="true">2</div>
           <div class="track-info"><div class="track-label">Etapa 2</div><div class="track-title">Serviço & Data</div></div>
-        </div>
-        <div class="track-item" id="track-3">
-          <div class="track-dot" id="dot-3">3</div>
+        </li>
+        <li class="track-item" id="track-3">
+          <div class="track-dot" id="dot-3" aria-hidden="true">3</div>
           <div class="track-info"><div class="track-label">Etapa 3</div><div class="track-title">Confirmação</div></div>
-        </div>
-      </div>
+        </li>
+      </ol>
     </div>
 
     <div class="card">
       <div class="card-top-bar"></div>
       <div class="card-body">
-
         <!-- 1a: Email lookup -->
-        <div class="step-panel active" id="step-1a">
+        <section class="step-panel active" id="step-1a" aria-labelledby="title-1a">
           <span class="step-tag">✦ Etapa 1 de 3</span>
-          <h2 class="step-title">Para começar, informe seu <em>e-mail</em></h2>
-          <div class="alert alert-error" id="alert-1a"></div>
+          <h2 class="step-title" id="title-1a" tabindex="-1">Para começar, informe seu <em>e-mail</em></h2>
+          <div class="alert alert-error" id="alert-1a" role="alert" aria-atomic="true"></div>
           <div class="field">
             <label for="email-lookup">E-mail</label>
             <input type="email" id="email-lookup" placeholder="seu@email.com" autocomplete="email">
             <div class="field-error" id="err-email-lookup">Informe um e-mail válido.</div>
           </div>
           <button class="btn-primary" id="btn-1a" onclick="checkEmail()">
-            <div class="btn-spinner"></div><span class="btn-label">Continuar →</span>
+            <div class="btn-spinner" aria-hidden="true"></div><span class="btn-label">Continuar →</span>
           </button>
-        </div>
+        </section>
 
         <!-- 1b: Novo cadastro -->
-        <div class="step-panel" id="step-1b">
+        <section class="step-panel" id="step-1b" aria-labelledby="title-1b" hidden>
           <span class="step-tag">✦ Etapa 1 de 3</span>
-          <h2 class="step-title">Vimos que você <em>não tem cadastro</em></h2>
+          <h2 class="step-title" id="title-1b" tabindex="-1">Vimos que você <em>não tem cadastro</em></h2>
           <p style="font-size:13px;color:rgba(61,28,8,.55);margin-bottom:22px;line-height:1.7;">Preencha seus dados para continuar com o agendamento.</p>
-          <div class="alert alert-error" id="alert-1b"></div>
+          <div class="alert alert-error" id="alert-1b" role="alert" aria-atomic="true"></div>
           <div class="field">
             <label for="novo-nome">Nome completo</label>
             <input type="text" id="novo-nome" placeholder="Ex: Maria Souza" autocomplete="name">
@@ -77,35 +78,35 @@
             <div class="field-error" id="err-novo-telefone">Informe um número com 11 dígitos.</div>
           </div>
           <button class="btn-primary" id="btn-1b" onclick="submitCadastro()">
-            <div class="btn-spinner"></div><span class="btn-label">Criar cadastro e continuar →</span>
+            <div class="btn-spinner" aria-hidden="true"></div><span class="btn-label">Criar cadastro e continuar →</span>
           </button>
           <button class="btn-ghost" onclick="goToStep('1a')">← Usar outro e-mail</button>
-        </div>
+        </section>
 
         <!-- 1c: Boas-vindas -->
-        <div class="step-panel" id="step-1c">
+        <section class="step-panel" id="step-1c" aria-labelledby="title-1c" hidden>
           <span class="step-tag">✦ Etapa 1 de 3</span>
-          <h2 class="step-title">Bem-vinda de <em>volta!</em></h2>
-          <div class="alert alert-error" id="alert-1c"></div>
+          <h2 class="step-title" id="title-1c" tabindex="-1">Bem-vinda de <em>volta!</em></h2>
+          <div class="alert alert-error" id="alert-1c" role="alert" aria-atomic="true"></div>
           <div class="welcome-box">
-            <div class="wb-name" id="wb-name">—</div>
-            <div class="wb-row">📧 <span id="wb-email">—</span></div>
-            <div class="wb-row">📱 <span id="wb-phone">—</span></div>
+            <p class="wb-name" id="wb-name">—</p>
+            <p class="wb-row"><span aria-hidden="true">📧 </span><span id="wb-email">—</span></p>
+            <p class="wb-row"><span aria-hidden="true">📱 </span><span id="wb-phone">—</span></p>
             <div class="wb-admin">Dados incorretos? Entre em contato com o <a href="mailto:tatiane@agendatrancista.com">administrador</a>.</div>
           </div>
           <button class="btn-primary" id="btn-1c" onclick="goToStep(2)">
             <span class="btn-label">Continuar →</span>
           </button>
           <button class="btn-ghost" onclick="goToStep('1a')">← Usar outro e-mail</button>
-        </div>
+        </section>
 
         <!-- Step 2: Serviço + Data + Local -->
-        <div class="step-panel" id="step-2">
+        <section class="step-panel" id="step-2" aria-labelledby="title-2" hidden>
           <span class="step-tag">✦ Etapa 2 de 3</span>
-          <h2 class="step-title">Escolha o <em>serviço e a data</em></h2>
-          <div class="alert alert-error" id="alert-2"></div>
+          <h2 class="step-title" id="title-2" tabindex="-1">Escolha o <em>serviço e a data</em></h2>
+          <div class="alert alert-error" id="alert-2" role="alert" aria-atomic="true"></div>
 
-          <div class="field" style="margin-bottom:22px;">
+          <div class="field service-field">
             <label for="servico-select">Tipo de trança</label>
             <div class="select-wrapper">
               <select id="servico-select">
@@ -115,73 +116,79 @@
             <div class="field-error" id="err-servico">Selecione um serviço.</div>
           </div>
 
-          <div style="margin-bottom:22px;">
-            <div class="calendar-label">Data disponível</div>
+          <fieldset class="date-fieldset" id="date-fieldset">
+            <legend class="calendar-label">Data disponível</legend>
             <div class="dates-grid" id="dates-grid">
-              <div class="dates-loading"><div class="spinner"></div>Buscando datas…</div>
+              <span class="dates-loading">Buscando datas…</span>
             </div>
-            <div class="field-error" id="err-data" style="margin-top:-10px;margin-bottom:10px;">Selecione uma data.</div>
-          </div>
+            <p class="field-error" id="err-data">Selecione uma data.</p>
+            <p class="sr-only" id="dates-status" role="status" aria-live="polite" aria-atomic="true">Buscando datas disponíveis.</p>
+          </fieldset>
 
-          <div class="field">
-            <div class="calendar-label">Local de atendimento</div>
+          <fieldset class="field location-fieldset">
+            <legend class="calendar-label">Local de atendimento</legend>
             <div class="location-options">
-              <div class="loc-opt selected" id="loc-salao" onclick="selectLocation('salao')">
-                <span class="loc-icon">🏠</span>
-                <div class="loc-name">No salão</div>
-                <div class="loc-desc">Rua Nelson Tigrão, 15</div>
-              </div>
-              <div class="loc-opt" id="loc-domicilio" onclick="selectLocation('domicilio')">
-                <span class="loc-icon">📍</span>
-                <div class="loc-name">Em casa</div>
-                <div class="loc-desc">Taxa adicional</div>
-              </div>
+              <input class="location-radio" type="radio" id="loc-salao" name="localizacao" value="salao" checked>
+              <label class="loc-opt selected" for="loc-salao">
+                <span class="loc-icon" aria-hidden="true">🏠</span>
+                <span class="loc-name">No salão</span>
+                <span class="loc-desc">Rua Nelson Tigrão, 15</span>
+              </label>
+              <input class="location-radio" type="radio" id="loc-domicilio" name="localizacao" value="domicilio">
+              <label class="loc-opt" for="loc-domicilio">
+                <span class="loc-icon" aria-hidden="true">📍</span>
+                <span class="loc-name">Em casa</span>
+                <span class="loc-desc">Taxa adicional</span>
+              </label>
             </div>
-          </div>
+          </fieldset>
 
-          <div class="field" id="field-endereco">
+          <div class="field" id="field-endereco" hidden>
             <label for="endereco">Endereço completo</label>
             <input type="text" id="endereco" placeholder="Rua, número, bairro, CEP">
             <div class="field-error" id="err-endereco">Informe seu endereço.</div>
           </div>
 
           <button class="btn-primary" id="btn-2" onclick="irParaConfirmacao()">
-            <div class="btn-spinner"></div><span class="btn-label">Revisar agendamento →</span>
+            <div class="btn-spinner" aria-hidden="true"></div><span class="btn-label">Revisar agendamento →</span>
           </button>
           <button class="btn-ghost" onclick="voltarStep1()">← Voltar</button>
-        </div>
+        </section>
 
         <!-- Step 3: Confirmação -->
-        <div class="step-panel" id="step-3">
+        <section class="step-panel" id="step-3" aria-labelledby="title-3" hidden>
           <span class="step-tag">✦ Tudo certinho?</span>
-          <h2 class="step-title">Confirme seu <em>agendamento</em></h2>
-          <div class="alert alert-error" id="alert-3"></div>
-          <div class="summary-box">
-            <div class="summary-row"><span class="summary-icon">👤</span><div><div class="summary-key">Cliente</div><div class="summary-val" id="sum-nome">—</div></div></div>
-            <div class="summary-row"><span class="summary-icon">✂️</span><div><div class="summary-key">Serviço</div><div class="summary-val" id="sum-servico">—</div></div></div>
-            <div class="summary-row"><span class="summary-icon">📅</span><div><div class="summary-key">Data</div><div class="summary-val" id="sum-data">—</div></div></div>
-            <div class="summary-row"><span class="summary-icon">🕐</span><div><div class="summary-key">Horário</div><div class="summary-val">11:00</div></div></div>
-            <div class="summary-row"><span class="summary-icon">🏠</span><div><div class="summary-key">Local</div><div class="summary-val" id="sum-local">—</div></div></div>
-          </div>
+          <h2 class="step-title" id="title-3" tabindex="-1">Confirme seu <em>agendamento</em></h2>
+          <div class="alert alert-error" id="alert-3" role="alert" aria-atomic="true"></div>
+          <dl class="summary-box">
+              <div class="summary-row"><div><dt class="summary-key">Cliente</dt><dd class="summary-val" id="sum-nome">—</dd></div></div>
+              <div class="summary-row"><div><dt class="summary-key">Serviço</dt><dd class="summary-val" id="sum-servico">—</dd></div></div>
+              <div class="summary-row"><div><dt class="summary-key">Data</dt><dd class="summary-val" id="sum-data">—</dd></div></div>
+              <div class="summary-row"><div><dt class="summary-key">Horário</dt><dd class="summary-val">11:00</dd></div></div>
+              <div class="summary-row"><div><dt class="summary-key">Local</dt><dd class="summary-val" id="sum-local">—</dd></div></div>
+          </dl>
           <button class="btn-primary" id="btn-3" onclick="confirmarAgendamento()">
-            <div class="btn-spinner"></div><span class="btn-label">✓ Confirmar agendamento</span>
+            <div class="btn-spinner" aria-hidden="true"></div><span class="btn-label">Confirmar agendamento</span>
           </button>
           <button class="btn-ghost" onclick="goToStep(2)">← Voltar</button>
-        </div>
+        </section>
 
         <!-- Success -->
-        <div class="step-panel" id="step-success">
+        <section class="step-panel" id="step-success" aria-labelledby="title-success" hidden>
           <div class="success-screen">
-            <div class="success-circle">✓</div>
-            <h2 class="success-title">Agendado!</h2>
+            <div class="success-circle" aria-hidden="true">✓</div>
+            <h2 class="success-title" id="title-success" tabindex="-1">Agendamento confirmado!</h2>
+            <p class="success-desc">Seu horário foi confirmado. Confira os detalhes abaixo.</p>
             <div class="summary-box" style="text-align:left;margin-bottom:28px;">
-              <div class="summary-row"><span class="summary-icon">✂️</span><div><div class="summary-key">Serviço</div><div class="summary-val" id="sum-servico-final">—</div></div></div>
-              <div class="summary-row"><span class="summary-icon">📅</span><div><div class="summary-key">Data</div><div class="summary-val" id="sum-data-final">—</div></div></div>
-              <div class="summary-row"><span class="summary-icon">🏠</span><div><div class="summary-key">Local</div><div class="summary-val" id="sum-local-final">—</div></div></div>
+              <dl>
+                <div class="summary-row"><div><dt class="summary-key">Serviço</dt><dd class="summary-val" id="sum-servico-final">—</dd></div></div>
+                <div class="summary-row"><div><dt class="summary-key">Data e horário</dt><dd class="summary-val" id="sum-data-final">—</dd></div></div>
+                <div class="summary-row"><div><dt class="summary-key">Local</dt><dd class="summary-val" id="sum-local-final">—</dd></div></div>
+              </dl>
             </div>
             <a href="{% url 'home' %}" style="display:block;text-decoration:none;text-align:center;padding:15px;background:var(--terra);color:var(--branco-quente);border-radius:3px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;letter-spacing:.06em;">Voltar à página inicial</a>
           </div>
-        </div>
+        </section>
 
       </div>
     </div>

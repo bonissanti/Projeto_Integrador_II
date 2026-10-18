@@ -15,6 +15,7 @@
       if (label) {
         label.textContent = enabled ? 'Contraste normal' : 'Alto contraste';
       }
+      btn.setAttribute('aria-label', enabled ? 'Desativar alto contraste' : 'Ativar alto contraste');
     }
   }
 

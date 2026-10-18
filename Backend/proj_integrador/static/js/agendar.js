@@ -16,28 +16,44 @@ const state = {
 const STEP_TRACKER = {'1a': 1, '1b': 1, '1c': 1, 2: 2, 3: 3};
 
 function goToStep(s) {
-    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
-    if (s === 'success') {
-        document.getElementById('step-success').classList.add('active');
-        for (let i = 1; i <= 3; i++) {
-            document.getElementById('track-' + i).className = 'track-item done';
-            document.getElementById('dot-' + i).textContent = '✓';
-        }
-        return;
-    }
-    document.getElementById('step-' + s).classList.add('active');
-    const active = STEP_TRACKER[s] ?? (typeof s === 'number' ? s : 1);
+    const isSuccess = s === 'success';
+    const panelId = isSuccess ? 'step-success' : 'step-' + s;
+    const panel = document.getElementById(panelId);
+    document.querySelectorAll('.step-panel').forEach(p => {
+        const isActive = p === panel;
+        p.hidden = !isActive;
+        p.classList.toggle('active', isActive);
+    });
+
+    const active = isSuccess ? 3 : STEP_TRACKER[s] ?? (typeof s === 'number' ? s : 1);
     for (let i = 1; i <= 3; i++) {
-        const t = document.getElementById('track-' + i), d = document.getElementById('dot-' + i);
-        t.className = 'track-item' + (i < active ? ' done' : i === active ? ' active' : '');
-        d.textContent = i < active ? '✓' : i;
+        const tracker = document.getElementById('track-' + i);
+        const dot = document.getElementById('dot-' + i);
+        const isCurrent = i === active;
+        const isDone = isSuccess || i < active;
+        tracker.className = 'track-item' + (isDone ? ' done' : isCurrent ? ' active' : '');
+        if (isCurrent && !isSuccess) {
+            tracker.setAttribute('aria-current', 'step');
+        } else {
+            tracker.removeAttribute('aria-current');
+        }
+        dot.textContent = isDone ? '✓' : i;
     }
-    window.scrollTo({top: 0, behavior: 'smooth'});
+
+    const title = panel.querySelector('[tabindex="-1"]');
+    title?.focus();
+    window.scrollTo({top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
 }
 
 function setLoading(id, on) {
     const b = document.getElementById(id);
     b.disabled = on;
+    b.setAttribute('aria-busy', String(on));
+    const label = b.querySelector('.btn-label');
+    if (label) {
+        if (!label.dataset.defaultLabel) label.dataset.defaultLabel = label.textContent;
+        label.textContent = on ? 'Aguarde…' : label.dataset.defaultLabel;
+    }
     on ? b.classList.add('btn-loading') : b.classList.remove('btn-loading');
 }
 
@@ -48,16 +64,39 @@ function showAlert(id, msg) {
 }
 
 function hideAlert(id) {
-    document.getElementById(id).classList.remove('visible');
+    const alert = document.getElementById(id);
+    alert.classList.remove('visible');
+    alert.textContent = '';
 }
 
 function showFieldErr(inp, err) {
-    document.getElementById(inp)?.classList.add('input-error');
+    const field = document.getElementById(inp);
+    if (field) {
+        field.classList.add('input-error');
+        field.setAttribute('aria-invalid', 'true');
+        field.setAttribute('aria-describedby', err);
+    }
     document.getElementById(err)?.classList.add('visible');
 }
 
 function clearErrs(...ids) {
-    ids.forEach(id => document.getElementById(id)?.classList.remove('input-error', 'visible'));
+    ids.forEach(id => {
+        const element = document.getElementById(id);
+        if (!element) return;
+        element.classList.remove('input-error', 'visible');
+        element.removeAttribute('aria-invalid');
+        if (element.matches('input, select, fieldset')) {
+            element.removeAttribute('aria-describedby');
+        }
+    });
+}
+
+function focusFirstInvalid() {
+    const invalid = document.querySelector('[aria-invalid="true"]');
+    const focusTarget = invalid?.matches('fieldset')
+        ? invalid.querySelector('input')
+        : invalid;
+    focusTarget?.focus();
 }
 
 // ── Step 1a: check email ──
@@ -67,6 +106,7 @@ async function checkEmail() {
     const email = document.getElementById('email-lookup').value.trim();
     if (!email || !email.includes('@') || !email.includes('.')) {
         showFieldErr('email-lookup', 'err-email-lookup');
+        focusFirstInvalid();
         return;
     }
     state.email = email;
@@ -111,7 +151,10 @@ async function submitCadastro() {
         showFieldErr('novo-telefone', 'err-novo-telefone');
         ok = false;
     }
-    if (!ok) return;
+    if (!ok) {
+        focusFirstInvalid();
+        return;
+    }
     setLoading('btn-1b', true);
 
     try {
@@ -164,11 +207,18 @@ async function loadServices() {
 
 async function loadDates() {
     const grid = document.getElementById('dates-grid');
-    grid.innerHTML = '<div class="dates-loading"><div class="spinner"></div>Buscando datas…</div>';
+    const status = document.getElementById('dates-status');
+    status.textContent = 'Buscando datas disponíveis.';
+    grid.innerHTML = '<span class="dates-loading">Buscando datas…</span>';
     try {
-        renderDates(await fetchAvailableDates());
+        const dates = await fetchAvailableDates();
+        renderDates(dates);
+        status.textContent = dates.length
+            ? `${dates.length} datas disponíveis.`
+            : 'Nenhuma data disponível.';
     } catch (e) {
-        grid.innerHTML = '<div class="dates-error">Não foi possível carregar as datas.</div>';
+        grid.innerHTML = '<p class="dates-error">Não foi possível carregar as datas.</p>';
+        status.textContent = 'Não foi possível carregar as datas.';
     }
 }
 
@@ -196,29 +246,58 @@ async function fetchAvailableDates() {
 function renderDates(dates) {
     const grid = document.getElementById('dates-grid');
     if (!dates?.length) {
-        grid.innerHTML = '<div class="dates-error">Nenhuma data disponível.</div>';
+        grid.innerHTML = '<p class="dates-error">Nenhuma data disponível.</p>';
         return;
     }
-    grid.innerHTML = dates.map(d => `
-      <div class="date-chip" data-date="${d.toISOString()}" onclick="selectDate(this)">
-        <span class="chip-weekday">${DIAS[d.getDay()]}</span>
-        <span class="chip-day">${String(d.getDate()).padStart(2, '0')}</span>
-        <span class="chip-month">${MESES[d.getMonth()]}</span>
-      </div>`).join('');
-}
+    grid.replaceChildren(...dates.map((date, index) => {
+        const dateId = `date-option-${index}`;
+        const input = document.createElement('input');
+        input.className = 'date-radio';
+        input.type = 'radio';
+        input.name = 'appointment-date';
+        input.id = dateId;
+        input.value = date.toISOString();
+        input.addEventListener('change', () => {
+            state.dataSelecionada = new Date(input.value);
+            grid.querySelectorAll('.date-chip').forEach(label => {
+                label.classList.toggle('selected', label.htmlFor === input.id);
+            });
+            document.getElementById('date-fieldset').removeAttribute('aria-invalid');
+            document.getElementById('date-fieldset').removeAttribute('aria-describedby');
+            document.getElementById('err-data').classList.remove('visible');
+        });
 
-function selectDate(el) {
-    document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    state.dataSelecionada = new Date(el.dataset.date);
-    clearErrs('err-data');
-}
+        const label = document.createElement('label');
+        label.className = 'date-chip';
+        label.htmlFor = dateId;
 
-function selectLocation(loc) {
-    state.localizacao = loc;
-    document.getElementById('loc-salao').classList.toggle('selected', loc === 'salao');
-    document.getElementById('loc-domicilio').classList.toggle('selected', loc === 'domicilio');
-    document.getElementById('field-endereco').classList.toggle('visible', loc === 'domicilio');
+        const accessibleDate = document.createElement('span');
+        accessibleDate.className = 'sr-only';
+        accessibleDate.textContent = new Intl.DateTimeFormat('pt-BR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        }).format(date);
+        label.appendChild(accessibleDate);
+
+        [
+            ['chip-weekday', DIAS[date.getDay()]],
+            ['chip-day', String(date.getDate()).padStart(2, '0')],
+            ['chip-month', MESES[date.getMonth()]]
+        ].forEach(([className, text]) => {
+            const visibleText = document.createElement('span');
+            visibleText.className = className;
+            visibleText.setAttribute('aria-hidden', 'true');
+            visibleText.textContent = text;
+            label.appendChild(visibleText);
+        });
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'date-option';
+        wrapper.append(input, label);
+        return wrapper;
+    }));
 }
 
 function voltarStep1() {
@@ -228,7 +307,7 @@ function voltarStep1() {
 // ── Step 2 → 3 ──
 function irParaConfirmacao() {
     hideAlert('alert-2');
-    clearErrs('servico-select', 'err-servico', 'err-data', 'endereco', 'err-endereco');
+    clearErrs('servico-select', 'err-servico', 'date-fieldset', 'err-data', 'endereco', 'err-endereco');
     const servico = document.getElementById('servico-select').value;
     let ok = true;
     if (!servico) {
@@ -236,7 +315,7 @@ function irParaConfirmacao() {
         ok = false;
     }
     if (!state.dataSelecionada) {
-        document.getElementById('err-data').classList.add('visible');
+        showFieldErr('date-fieldset', 'err-data');
         ok = false;
     }
     if (state.localizacao === 'domicilio') {
@@ -248,7 +327,10 @@ function irParaConfirmacao() {
     } else {
         state.endereco = 'Rua Nelson Tigrão, 15, Vila Missionária, CEP: 04430-165';
     }
-    if (!ok) return;
+    if (!ok) {
+        focusFirstInvalid();
+        return;
+    }
     state.servicoSelecionado = servico;
     const d = state.dataSelecionada;
     document.getElementById('sum-nome').textContent = state.usuario.nome;
@@ -316,9 +398,22 @@ async function confirmarAgendamento() {
 document.getElementById('novo-telefone').addEventListener('input', function () {
     this.value = this.value.replace(/\D/g, '').slice(0, 11);
 });
+document.querySelectorAll('input[name="localizacao"]').forEach(input => {
+    input.addEventListener('change', () => {
+        state.localizacao = input.value;
+        const isHome = input.value === 'domicilio';
+        document.querySelectorAll('.loc-opt').forEach(label => {
+            label.classList.toggle('selected', label.htmlFor === input.id);
+        });
+        const addressField = document.getElementById('field-endereco');
+        const addressInput = document.getElementById('endereco');
+        addressField.hidden = !isHome;
+        addressInput.required = isHome;
+        if (!isHome) clearErrs('endereco', 'err-endereco');
+    });
+});
 document.addEventListener('keydown', e => {
-    if (e.key !== 'Enter') return;
-    const a = document.querySelector('.step-panel.active')?.id;
-    if (a === 'step-1a') checkEmail();
-    else if (a === 'step-1b') submitCadastro();
+    if (e.key !== 'Enter' || e.target.matches('button, a, select, input[type="radio"]')) return;
+    if (e.target.id === 'email-lookup') checkEmail();
+    else if (e.target.id === 'novo-nome' || e.target.id === 'novo-telefone') submitCadastro();
 });
