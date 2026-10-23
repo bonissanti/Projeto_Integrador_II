@@ -66,7 +66,7 @@ init-env:
 	else \
 		echo "Gerando SECRET_KEY e criando .env..."; \
 		SECRET=$$($(PYTHON_BIN) -c "import secrets; print(secrets.token_urlsafe(64))"); \
-		printf "SECRET_KEY=%s\nVERIFY_TOKEN=altere-aqui-o-token-do-whatsapp\n" "$$SECRET" > .env; \
+		printf "SECRET_KEY=%s\nDEBUG=True\nVERIFY_TOKEN=altere-aqui-o-token-do-whatsapp\n" "$$SECRET" > .env; \
 		echo "Arquivo .env criado. Ajuste VERIFY_TOKEN com o token do WhatsApp Cloud API."; \
 	fi
 
