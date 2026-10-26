@@ -9,30 +9,6 @@ class Migration(migrations.Migration):
         ('Agendamento', '0002_scheduled_at'),
     ]
 
-    operations = [
-        migrations.AddField(
-            model_name='appointment',
-            name='location',
-            field=models.CharField(default='Rua Nelson Tigrão, 15, Vila Missionária, CEP: 04430-165', max_length=255),
-        ),
-        migrations.AddField(
-            model_name='customer',
-            name='deleted',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='customer',
-            name='senha',
-            field=models.CharField(default='temp', max_length=128),
-        ),
-        migrations.AlterField(
-            model_name='customer',
-            name='name',
-            field=models.CharField(max_length=99),
-        ),
-        migrations.AlterField(
-            model_name='customer',
-            name='phone',
-            field=models.CharField(max_length=19),
-        ),
-    ]
+    # Fields already created by the 0002_customer_deleted branch; kept as a no-op
+    # so fresh databases (e.g. Postgres) do not add the same columns twice.
+    operations = []
