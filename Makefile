@@ -16,7 +16,7 @@ RM := rm -rf
 PYTHON_BIN := $(shell command -v python3 || command -v python)
 endif
 
-.PHONY: help setup install venv activate migrate makemigrations runserver createsuperuser ensure-admin test check init-env update-requirements clean inserir-servicos
+.PHONY: help setup install venv activate migrate makemigrations render-build render-start runserver createsuperuser ensure-admin test check init-env update-requirements clean inserir-servicos
 
 help:
 	@echo ""
@@ -34,6 +34,8 @@ help:
 	@echo ""
 	@echo "EXECUTAR PROJETO:"
 	@echo "  make migrate            Prepara o banco de dados"
+	@echo "  make render-build       Instala dependências e coleta estáticos no Render"
+	@echo "  make render-start       Aplica migrações e inicia Gunicorn no Render"
 	@echo "  make runserver          Inicia o servidor (acesse http://localhost:8000)"
 	@echo "  make createsuperuser    Cria conta de administrador"
 	@echo ""
@@ -94,6 +96,13 @@ migrate:
 makemigrations:
 	@echo "Criando migrations..."
 	@$(PY) $(MANAGE) makemigrations
+
+render-build:
+	@python -m pip install -r requirements.txt
+	@python $(MANAGE) collectstatic --noinput
+
+render-start:
+	@cd Backend/proj_integrador && python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:$${PORT}
 
 ensure-admin:
 	@$(PY) $(MANAGE) ensure_admin
