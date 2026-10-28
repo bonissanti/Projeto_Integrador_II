@@ -6,6 +6,7 @@ cryptography==46.0.6
 dj-database-url==3.1.2
 Django==6.0.3
 django-cors-headers==4.9.0
+django-unfold==0.110.0
 Faker==40.15.0
 google-api-core==2.30.2
 google-api-python-client==2.193.0

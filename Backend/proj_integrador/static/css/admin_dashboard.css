@@ -1,0 +1,98 @@
+.admin-dashboard {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.admin-dashboard > h1,
+.admin-dashboard__section h2 {
+    color: #4c0519;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.admin-dashboard__stats {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+
+.admin-dashboard__card,
+.admin-dashboard__section {
+    background: #fff;
+    border: 1px solid #fecdd3;
+    border-radius: 0.75rem;
+    padding: 1rem;
+}
+
+.admin-dashboard__card h2 {
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.admin-dashboard__value {
+    color: #881337;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+}
+
+.admin-dashboard__card a {
+    color: #9f1239;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+}
+
+.admin-dashboard__section {
+    display: grid;
+    gap: 1rem;
+}
+
+.admin-dashboard__table-wrap {
+    overflow-x: auto;
+}
+
+.admin-dashboard table {
+    border-collapse: collapse;
+    min-width: 32rem;
+    width: 100%;
+}
+
+.admin-dashboard th,
+.admin-dashboard td {
+    border-bottom: 1px solid #ffe4e6;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+.admin-dashboard th {
+    color: #6b7280;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.admin-dashboard__stock-list {
+    display: grid;
+    gap: 0.75rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.admin-dashboard__stock-list li {
+    align-items: center;
+    border-bottom: 1px solid #ffe4e6;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    padding-bottom: 0.75rem;
+}
+
+.admin-dashboard__stock-list li:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}

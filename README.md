@@ -5,6 +5,7 @@ Sistema de agendamento para um salão de tranças. Clientes podem agendar pelo s
 ## Funcionalidades
 
 - Agendamentos pelo site e pelo bot do Telegram
+- Painel administrativo com agenda diária e alertas de estoque
 - Gestão de clientes, serviços e agenda pelo Django Admin
 - Sincronização de agendamentos com o Google Calendar
 - Controle de estoque e alertas de reposição pelo Telegram

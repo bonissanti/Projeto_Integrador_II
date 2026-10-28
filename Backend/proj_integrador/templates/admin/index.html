@@ -1,0 +1,68 @@
+{% extends 'admin/base.html' %}
+
+{% load static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+    <main class="admin-dashboard" aria-labelledby="dashboard-title">
+        <h1 id="dashboard-title">Visão geral</h1>
+
+        {% if dashboard_stats %}
+            <section class="admin-dashboard__stats" aria-label="Indicadores">
+                {% for statistic in dashboard_stats %}
+                    <article class="admin-dashboard__card">
+                        <h2>{{ statistic.label }}</h2>
+                        <p class="admin-dashboard__value">{{ statistic.value }}</p>
+                        <a href="{{ statistic.url }}">{{ statistic.link_label }}</a>
+                    </article>
+                {% endfor %}
+            </section>
+
+            {% if upcoming_appointments %}
+                <section class="admin-dashboard__section" aria-labelledby="upcoming-title">
+                    <h2 id="upcoming-title">Próximos agendamentos</h2>
+                    <div class="admin-dashboard__table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Data e hora</th>
+                                    <th scope="col">Cliente</th>
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in upcoming_appointments %}
+                                    <tr>
+                                        <td>{{ appointment.scheduled_at|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ appointment.customer.name }}</td>
+                                        <td>{{ appointment.get_status_display }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            {% endif %}
+
+            {% if low_stock_items %}
+                <section class="admin-dashboard__section" aria-labelledby="low-stock-title">
+                    <h2 id="low-stock-title">Itens com estoque baixo</h2>
+                    <ul class="admin-dashboard__stock-list">
+                        {% for item in low_stock_items %}
+                            <li>
+                                <span>{{ item.name }}</span>
+                                <span>{{ item.quantity_on_hand }} {{ item.unit }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            {% endif %}
+        {% else %}
+            <p>Seu usuário ainda não tem permissão para visualizar os indicadores do painel.</p>
+        {% endif %}
+    </main>
+{% endblock %}

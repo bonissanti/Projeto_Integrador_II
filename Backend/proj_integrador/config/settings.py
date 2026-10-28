@@ -14,6 +14,8 @@ from pathlib import Path
 
 import dj_database_url
 from django.core.checks import templates
+from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from dotenv import load_dotenv
 
 # Build paths inside the config like this: BASE_DIR / 'subdir'.
@@ -66,6 +68,7 @@ API_BASE_URL = os.getenv('API_BASE_URL', 'http://127.0.0.1:8080')
 # Application definition
 
 INSTALLED_APPS = [
+    'unfold',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -156,7 +159,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
 TIME_ZONE = 'America/Sao_Paulo'
 
@@ -187,3 +190,114 @@ TELEGRAM_WEBHOOK_SECRET = os.getenv("TELEGRAM_WEBHOOK_SECRET")
 # chat_id do Telegram da Tati (trancista), usado para notificações
 # administrativas como alerta de estoque de cabelo baixo.
 TELEGRAM_ADMIN_CHAT_ID = os.getenv("TELEGRAM_ADMIN_CHAT_ID")
+
+UNFOLD = {
+    "SITE_TITLE": "Agenda Trancista",
+    "SITE_HEADER": "Agenda Trancista",
+    "SITE_SUBHEADER": "Administração",
+    "SITE_URL": "/",
+    "SITE_SYMBOL": "spa",
+    "THEME": "light",
+    "DASHBOARD_CALLBACK": "Agendamento.admin.dashboard_callback",
+    "COLORS": {
+        "primary": {
+            "50": "#fff1f2",
+            "100": "#ffe4e6",
+            "200": "#fecdd3",
+            "300": "#fda4af",
+            "400": "#fb7185",
+            "500": "#e11d48",
+            "600": "#be123c",
+            "700": "#9f1239",
+            "800": "#881337",
+            "900": "#4c0519",
+            "950": "#2b020e",
+        },
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            {
+                "title": _("Painel"),
+                "separator": True,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": _("Visão geral"),
+                        "icon": "dashboard",
+                        "link": reverse_lazy("admin:index"),
+                    },
+                ],
+            },
+            {
+                "title": _("Agendamentos"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Gerenciar agendamentos"),
+                        "icon": "event",
+                        "link": reverse_lazy("admin:Agendamento_appointment_changelist"),
+                        "permission": lambda request: request.user.has_perm(
+                            "Agendamento.view_appointment"
+                        ),
+                    },
+                ],
+            },
+            {
+                "title": _("Clientes"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Gerenciar clientes"),
+                        "icon": "people",
+                        "link": reverse_lazy("admin:Agendamento_customer_changelist"),
+                        "permission": lambda request: request.user.has_perm(
+                            "Agendamento.view_customer"
+                        ),
+                    },
+                ],
+            },
+            {
+                "title": _("Serviços"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Gerenciar serviços"),
+                        "icon": "content_cut",
+                        "link": reverse_lazy("admin:Agendamento_service_changelist"),
+                        "permission": lambda request: request.user.has_perm(
+                            "Agendamento.view_service"
+                        ),
+                    },
+                ],
+            },
+            {
+                "title": _("Estoque"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Itens de estoque"),
+                        "icon": "inventory_2",
+                        "link": reverse_lazy("admin:Agendamento_hairstock_changelist"),
+                        "permission": lambda request: request.user.has_perm(
+                            "Agendamento.view_hairstock"
+                        ),
+                    },
+                    {
+                        "title": _("Movimentações"),
+                        "icon": "swap_vert",
+                        "link": reverse_lazy("admin:Agendamento_hairmovement_changelist"),
+                        "permission": lambda request: request.user.has_perm(
+                            "Agendamento.view_hairmovement"
+                        ),
+                    },
+                ],
+            },
+        ],
+    },
+}

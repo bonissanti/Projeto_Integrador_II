@@ -1,11 +1,80 @@
 from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
+from django.db.models import F
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin
 
 from .models import Appointment, AppointmentxService, Customer, Service, HairStock, HairMovement, ServiceHairStock
+
+
+def dashboard_callback(request, context):
+    estatisticas = []
+    agendamentos_futuros = Appointment.objects.none()
+    itens_estoque_baixo = HairStock.objects.none()
+
+    if request.user.has_perm("Agendamento.view_appointment"):
+        hoje = timezone.localdate()
+        agendamentos_futuros = (
+            Appointment.objects.filter(status="scheduled", scheduled_at__gte=timezone.now())
+            .select_related("customer")
+            .order_by("scheduled_at")
+        )
+        estatisticas.extend([
+            {
+                "label": "Agendamentos de hoje",
+                "value": Appointment.objects.filter(
+                    status="scheduled",
+                    scheduled_at__date=hoje,
+                ).count(),
+                "url": reverse("admin:Agendamento_appointment_changelist"),
+                "link_label": "Ver agenda",
+            },
+            {
+                "label": "Próximos agendamentos",
+                "value": agendamentos_futuros.count(),
+                "url": reverse("admin:Agendamento_appointment_changelist"),
+                "link_label": "Ver agenda",
+            },
+        ])
+
+    if request.user.has_perm("Agendamento.view_hairstock"):
+        estoque_ativo = HairStock.objects.listar_ativos()
+        estoque_baixo = estoque_ativo.filter(
+            quantity_on_hand__gt=0,
+            quantity_on_hand__lte=F("minimum_stock"),
+        )
+        itens_estoque_baixo = estoque_baixo.order_by("quantity_on_hand", "name")[:5]
+        estatisticas.extend([
+            {
+                "label": "Itens com estoque baixo",
+                "value": estoque_baixo.count(),
+                "url": reverse("admin:Agendamento_hairstock_changelist"),
+                "link_label": "Ver estoque",
+            },
+            {
+                "label": "Itens esgotados",
+                "value": estoque_ativo.filter(quantity_on_hand=0).count(),
+                "url": reverse("admin:Agendamento_hairstock_changelist"),
+                "link_label": "Ver estoque",
+            },
+            {
+                "label": "Saldos negativos",
+                "value": estoque_ativo.filter(quantity_on_hand__lt=0).count(),
+                "url": reverse("admin:Agendamento_hairstock_changelist"),
+                "link_label": "Ver estoque",
+            },
+        ])
+
+    context.update({
+        "dashboard_stats": estatisticas,
+        "upcoming_appointments": agendamentos_futuros[:5],
+        "low_stock_items": itens_estoque_baixo,
+    })
+    return context
 
 
 class AppointmentxServiceInline(admin.TabularInline):
@@ -41,7 +110,7 @@ class AppointmentAdminForm(forms.ModelForm):
 
 
 @admin.register(Customer)
-class CustomerAdmin(admin.ModelAdmin):
+class CustomerAdmin(ModelAdmin):
     list_display = ('name', 'phone', 'email', 'deleted')
     list_filter = ('deleted',)
     search_fields = ('name', 'phone', 'email')
@@ -56,12 +125,12 @@ class ServiceHairStockInline(admin.TabularInline):
     model = ServiceHairStock
     extra = 1
     autocomplete_fields = ['hair_stock']
-    verbose_name = "Consumo de cabelo"
-    verbose_name_plural = "Consumo de cabelo por agendamento"
+    verbose_name = "Consumo de estoque"
+    verbose_name_plural = "Consumo de estoque por serviço"
 
 
 @admin.register(Service)
-class ServiceAdmin(admin.ModelAdmin):
+class ServiceAdmin(ModelAdmin):
     list_display = ('name', 'price_formatado', 'duration')
     search_fields = ('name',)
     ordering = ('name',)
@@ -73,7 +142,7 @@ class ServiceAdmin(admin.ModelAdmin):
 
 
 @admin.register(Appointment)
-class AppointmentAdmin(admin.ModelAdmin):
+class AppointmentAdmin(ModelAdmin):
     form = AppointmentAdminForm
     list_display = (
         'customer',
@@ -137,7 +206,7 @@ class MovimentarEstoqueForm(forms.Form):
 
 
 @admin.register(HairStock)
-class HairStockAdmin(admin.ModelAdmin):
+class HairStockAdmin(ModelAdmin):
     list_display = ('name', 'quantity_on_hand', 'unit', 'unit_price', 'minimum_stock', 'low_stock_flag', 'deleted')
     list_filter = ('deleted',)
     search_fields = ('name',)
@@ -216,7 +285,7 @@ class HairStockAdmin(admin.ModelAdmin):
 
 
 @admin.register(HairMovement)
-class HairMovementAdmin(admin.ModelAdmin):
+class HairMovementAdmin(ModelAdmin):
     # Histórico é somente leitura — nunca editado após criado. Corrigir um
     # erro = lançar uma movimentação de ajuste, não editar o passado.
     list_display = ('hair_stock', 'movement_type', 'quantity', 'unit_price_at_time', 'appointment', 'created_at')
