@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, time
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from django.db import models, transaction
-from decimal import Decimal
+from decimal import Decimal, ROUND_UP
 from django.core.exceptions import ValidationError
 
 
@@ -106,11 +106,14 @@ class AppointmentsManager(models.Manager):
                 applied_price=service.price,
             )
 
-            for consumo in service.hair_stock_usages.all():
+            for consumo in service.hair_stock_usages.select_related('hair_stock'):
                 try:
+                    quantity_in_stock_units = (
+                        consumo.quantity / consumo.hair_stock.consumption_factor
+                    ).quantize(Decimal('0.000001'), rounding=ROUND_UP)
                     HairStock.objects.registrar_saida(
                         consumo.hair_stock_id,
-                        consumo.quantity,
+                        quantity_in_stock_units,
                         appointment=appointment,
                         note=f'Consumo automático do agendamento #{appointment.id} ({service.name})',
                     )

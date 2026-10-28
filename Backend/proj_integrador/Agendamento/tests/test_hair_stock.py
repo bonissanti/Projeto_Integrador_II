@@ -60,6 +60,35 @@ class EstoqueDeCabeloTest(TestCase):
         self.assertEqual(consumo.hair_stock, self.cabelo)
 
     @patch('Agendamento.calendar_utils.criar_evento_google_calendar', return_value=None)
+    def test_consumo_em_unidade_diferente_converte_para_unidade_de_estoque(self, _mock_google):
+        estoque = HairStock.objects.create(
+            name="Mousse",
+            unit="frasco",
+            consumption_unit="ml",
+            consumption_factor=Decimal("200"),
+            unit_price=Decimal("0"),
+            quantity_on_hand=Decimal("1"),
+            minimum_stock=Decimal("0"),
+        )
+        ServiceHairStock.objects.create(
+            service=self.servico,
+            hair_stock=estoque,
+            quantity=Decimal("30"),
+        )
+
+        Appointment.objects.marcar_agendamento(
+            customer=self.cliente,
+            scheduled_at=self._futuro(),
+            location="Rua de Teste, 123",
+            services=[self.servico],
+        )
+
+        estoque.refresh_from_db()
+        movimento = HairMovement.objects.get(hair_stock=estoque)
+        self.assertEqual(estoque.quantity_on_hand, Decimal("0.850000"))
+        self.assertEqual(movimento.quantity, Decimal("0.150000"))
+
+    @patch('Agendamento.calendar_utils.criar_evento_google_calendar', return_value=None)
     def test_agendamento_debita_hair_stock_e_gera_hair_movement(self, _mock_google):
         ServiceHairStock.objects.create(
             service=self.servico,

@@ -1,0 +1,18 @@
+{% extends "admin/change_list.html" %}
+
+{% load static unfold %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/stock_list.css' %}">
+{% endblock %}
+
+{% block object-tools-items %}
+    {% if has_add_permission %}
+        {% url "admin:Agendamento_hairstock_importar" as import_url %}
+        {% component "unfold/components/button.html" with href=import_url variant="default" %}
+            Importar planilha
+        {% endcomponent %}
+    {% endif %}
+    {{ block.super }}
+{% endblock %}

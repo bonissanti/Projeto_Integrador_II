@@ -1,0 +1,120 @@
+{% extends "admin/base_site.html" %}
+
+{% load i18n static unfold %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/stock_import.css' %}">
+{% endblock %}
+
+{% block content %}
+    <main class="stock-import">
+        <h1>Importar estoque da planilha</h1>
+        <p>Envie o arquivo Excel original (.xlsx) com as abas “Estoque inicial” e “Consumo por procedimento”.</p>
+
+        {% if not preview %}
+            <form method="post" enctype="multipart/form-data" class="stock-import__form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="upload">
+                <label for="stock-workbook">Planilha de estoque (.xlsx)</label>
+                <input id="stock-workbook" type="file" name="arquivo" accept=".xlsx" required>
+                <div class="stock-import__actions">
+                    {% component "unfold/components/button.html" with submit=1 variant="primary" %}
+                        Analisar planilha
+                    {% endcomponent %}
+                    {% component "unfold/components/button.html" with href=changelist_url variant="default" %}
+                        Cancelar
+                    {% endcomponent %}
+                </div>
+            </form>
+        {% else %}
+            <section aria-labelledby="stock-preview-title">
+                <h2 id="stock-preview-title">Prévia do estoque inicial</h2>
+                <p>{{ stock_items|length }} item(ns) encontrado(s) na aba “Estoque inicial”.</p>
+
+                {% if missing_price_count %}
+                    <div class="stock-import__warning" role="alert">
+                        A planilha não informa o preço unitário de {{ missing_price_count }} item(ns).
+                        Se prosseguir, esses preços serão gravados como <strong>R$ 0,00</strong>.
+                        Você precisa confirmar essa condição antes de importar.
+                    </div>
+                {% endif %}
+
+                <div class="stock-import__table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Produto</th>
+                                <th scope="col">Unidade</th>
+                                <th scope="col">Estoque inicial</th>
+                                <th scope="col">Estoque mínimo</th>
+                                <th scope="col">Preço unitário</th>
+                                <th scope="col">Importação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in stock_items %}
+                                <tr>
+                                    <td>{{ item.name }}</td>
+                                    <td>{{ item.unit }}</td>
+                                    <td>{{ item.initial_quantity }}</td>
+                                    <td>{{ item.minimum_stock }}</td>
+                                    <td>
+                                        {% if item.unit_price is None %}
+                                            Sem valor
+                                        {% else %}
+                                            R$ {{ item.unit_price }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.already_exists %}
+                                            Já existe; saldo atual será preservado
+                                        {% else %}
+                                            Novo item
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if consumption_count %}
+                    <div class="stock-import__note">
+                        <h2>Aba “Consumo por procedimento”</h2>
+                        <p>
+                            A planilha contém {{ consumption_count }} linhas em
+                            {{ procedure_names|length }} procedimentos. Elas foram lidas,
+                            mas ainda não serão vinculadas automaticamente: os procedimentos
+                            precisam ser associados aos serviços cadastrados e os itens com
+                            unidades diferentes precisam de um fator de conversão.
+                        </p>
+                        <p>
+                            Os itens já suportam unidade de consumo e fator de conversão;
+                            essa importação inicial registra apenas o saldo de estoque.
+                        </p>
+                    </div>
+                {% endif %}
+
+                <form method="post" class="stock-import__form" {% if missing_price_count %}onsubmit="return confirm('Há itens sem preço. Se prosseguir, eles serão salvos com valor unitário R$ 0,00. Deseja continuar?')"{% endif %}>
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="confirm">
+                    {% if missing_price_count %}
+                        <label class="stock-import__confirmation">
+                            <input type="checkbox" name="confirmar_preco_zero" required>
+                            Confirmo importar os itens sem preço com valor unitário R$ 0,00.
+                        </label>
+                    {% endif %}
+                    <div class="stock-import__actions">
+                        {% component "unfold/components/button.html" with submit=1 variant="primary" %}
+                            Confirmar importação
+                        {% endcomponent %}
+                        {% component "unfold/components/button.html" with href=changelist_url variant="default" %}
+                            Cancelar
+                        {% endcomponent %}
+                    </div>
+                </form>
+            </section>
+        {% endif %}
+    </main>
+{% endblock %}

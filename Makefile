@@ -102,7 +102,7 @@ render-build:
 	@python $(MANAGE) collectstatic --noinput
 
 render-start:
-	@cd Backend/proj_integrador && python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:$${PORT}
+	@cd Backend/proj_integrador && python manage.py migrate --noinput && python manage.py ensure_admin && gunicorn config.wsgi:application --bind 0.0.0.0:$${PORT}
 
 ensure-admin:
 	@$(PY) $(MANAGE) ensure_admin

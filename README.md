@@ -5,7 +5,9 @@ Sistema de agendamento para um salão de tranças. Clientes podem agendar pelo s
 ## Funcionalidades
 
 - Agendamentos pelo site e pelo bot do Telegram
+- Painel administrativo com agenda diária e alertas de estoque
 - Gestão de clientes, serviços e agenda pelo Django Admin
+- Importação do estoque inicial a partir de planilha Excel
 - Sincronização de agendamentos com o Google Calendar
 - Controle de estoque e alertas de reposição pelo Telegram
 - Acessibilidade por teclado, suporte a leitores de tela e modo de alto contraste
@@ -81,6 +83,8 @@ make check
 ## Publicação no Render
 
 Configure `DATABASE_URL` (PostgreSQL), `SECRET_KEY` e `DEBUG=False` nas variáveis de ambiente do serviço. Para o bot, configure também `TELEGRAM_BOT_TOKEN` e, se usado, `TELEGRAM_WEBHOOK_SECRET` e `TELEGRAM_ADMIN_CHAT_ID`.
+
+No primeiro start, `make render-start` cria o superusuário padrão se ainda não houver nenhum: usuário `admin`, senha `12345`. A conta existente não é alterada. **Troque essa senha imediatamente após o primeiro acesso ao painel.**
 
 Defina os comandos do serviço:
 
