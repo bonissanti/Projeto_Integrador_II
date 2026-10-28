@@ -296,6 +296,14 @@ UNFOLD = {
                             "Agendamento.view_hairmovement"
                         ),
                     },
+                    {
+                        "title": _("Importar planilha"),
+                        "icon": "upload",
+                        "link": reverse_lazy("admin:Agendamento_hairstock_importar"),
+                        "permission": lambda request: request.user.has_perm(
+                            "Agendamento.add_hairstock"
+                        ),
+                    },
                 ],
             },
         ],

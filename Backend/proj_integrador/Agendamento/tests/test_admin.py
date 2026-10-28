@@ -28,6 +28,27 @@ class TestesDoAdmin(TestCase):
 
         self.assertContains(response, "Acesse seu painel administrativo")
         self.assertContains(response, "Voltar ao site")
+        self.assertContains(response, 'name="next" value="/admin/"')
+
+    def test_login_redireciona_para_o_admin(self):
+        senha = "senha-de-teste-segura"
+        get_user_model().objects.create_superuser(
+            username="admin-redirecionamento",
+            email="admin-redirecionamento@example.com",
+            password=senha,
+        )
+
+        response = self.client.post(
+            "/admin/login/",
+            {
+                "username": "admin-redirecionamento",
+                "password": senha,
+                "next": "/admin/",
+            },
+        )
+
+        self.assertRedirects(response, "/admin/", fetch_redirect_response=False)
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
 
     def test_superusuario_abre_admin_e_listas_existentes(self):
         self.criar_superusuario()
@@ -77,8 +98,49 @@ class TestesDoAdmin(TestCase):
             str(stock_list.context["cl"].opts.verbose_name_plural),
             "Itens de estoque",
         )
+        self.assertEqual(stock_list.context["stock_overview"], {
+            "total": 1,
+            "normal": 1,
+            "low": 0,
+            "out": 0,
+        })
         self.assertContains(stock_list, "Itens de estoque")
         self.assertContains(stock_list, "Quantidade disponível")
+        self.assertContains(stock_list, "Importar planilha")
+        self.assertContains(stock_list, "Produtos ativos")
+        self.assertContains(stock_list, "Normal")
+        self.assertContains(stock_list, "stock_list.css")
+
+    def test_lista_de_estoque_filtra_por_situacao(self):
+        self.criar_superusuario()
+        HairStock.objects.create(name="Normal", unit_price=1, quantity_on_hand=5, minimum_stock=2)
+        HairStock.objects.create(name="Baixo", unit_price=1, quantity_on_hand=1, minimum_stock=2)
+        HairStock.objects.create(name="Esgotado", unit_price=1, quantity_on_hand=0, minimum_stock=2)
+
+        for situacao, expected_name in (
+            ("normal", "Normal"),
+            ("baixo", "Baixo"),
+            ("esgotado", "Esgotado"),
+        ):
+            with self.subTest(situacao=situacao):
+                response = self.client.get(
+                    "/admin/Agendamento/hairstock/",
+                    {"situacao": situacao},
+                )
+                self.assertEqual(response.context["cl"].result_count, 1)
+                self.assertContains(response, expected_name)
+
+    def test_formulario_de_estoque_tem_um_salvar_e_cancelar_para_o_inicio(self):
+        self.criar_superusuario()
+
+        response = self.client.get("/admin/Agendamento/hairstock/add/")
+
+        self.assertContains(response, 'name="_save"')
+        self.assertEqual(response.content.count(b'name="_save"'), 1)
+        self.assertNotContains(response, 'name="_continue"')
+        self.assertNotContains(response, 'name="_addanother"')
+        self.assertContains(response, 'href="/admin/"')
+        self.assertContains(response, "Cancelar")
 
     def test_painel_mostra_indicadores_de_agenda_e_estoque(self):
         self.criar_superusuario()
@@ -150,6 +212,10 @@ class TestesDoAdmin(TestCase):
         )
         self.assertContains(response, "Cliente do painel")
         self.assertContains(response, "Estoque baixo")
+        self.assertContains(response, "Produtos ativos")
+        self.assertContains(response, "Alertas de estoque")
+        self.assertContains(response, "Últimas movimentações de estoque")
+        self.assertContains(response, "Ações rápidas")
 
     def test_funcionario_sem_permissao_nao_ve_dados_do_painel(self):
         get_user_model().objects.create_user(

@@ -9,58 +9,186 @@
 
 {% block content %}
     <main class="admin-dashboard" aria-labelledby="dashboard-title">
-        <h1 id="dashboard-title">Visão geral</h1>
+        <header class="admin-dashboard__header">
+            <div>
+                <h1 id="dashboard-title">Painel</h1>
+                <p>Resumo da agenda e do estoque do salão.</p>
+            </div>
+            <time datetime="{% now 'Y-m-d' %}">{% now "l, d/m/Y" %}</time>
+        </header>
 
         {% if dashboard_stats %}
-            <section class="admin-dashboard__stats" aria-label="Indicadores">
+            <section class="admin-dashboard__stats" aria-label="Indicadores principais">
                 {% for statistic in dashboard_stats %}
-                    <article class="admin-dashboard__card">
-                        <h2>{{ statistic.label }}</h2>
-                        <p class="admin-dashboard__value">{{ statistic.value }}</p>
-                        <a href="{{ statistic.url }}">{{ statistic.link_label }}</a>
-                    </article>
+                    {% if statistic.featured %}
+                        <article class="admin-dashboard__card">
+                            <span class="admin-dashboard__icon" aria-hidden="true">
+                                {% if statistic.label == "Agendamentos de hoje" %}event
+                                {% elif statistic.label == "Clientes cadastrados" %}group
+                                {% elif statistic.label == "Produtos ativos" %}inventory_2
+                                {% elif statistic.label == "Itens com estoque baixo" %}warning
+                                {% else %}inventory{% endif %}
+                            </span>
+                            <p class="admin-dashboard__value">{{ statistic.value }}</p>
+                            <h2>{{ statistic.label }}</h2>
+                            <a href="{{ statistic.url }}">{{ statistic.link_label }}</a>
+                        </article>
+                    {% endif %}
                 {% endfor %}
             </section>
 
-            {% if upcoming_appointments %}
-                <section class="admin-dashboard__section" aria-labelledby="upcoming-title">
-                    <h2 id="upcoming-title">Próximos agendamentos</h2>
-                    <div class="admin-dashboard__table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th scope="col">Data e hora</th>
-                                    <th scope="col">Cliente</th>
-                                    <th scope="col">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for appointment in upcoming_appointments %}
-                                    <tr>
-                                        <td>{{ appointment.scheduled_at|date:"d/m/Y H:i" }}</td>
-                                        <td>{{ appointment.customer.name }}</td>
-                                        <td>{{ appointment.get_status_display }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            {% endif %}
+            <section class="admin-dashboard__secondary" aria-label="Outros indicadores">
+                {% for statistic in dashboard_stats %}
+                    {% if not statistic.featured %}
+                        <article>
+                            <span>{{ statistic.label }}</span>
+                            <strong>{{ statistic.value }}</strong>
+                            <a href="{{ statistic.url }}">{{ statistic.link_label }}</a>
+                        </article>
+                    {% endif %}
+                {% endfor %}
+            </section>
 
-            {% if low_stock_items %}
-                <section class="admin-dashboard__section" aria-labelledby="low-stock-title">
-                    <h2 id="low-stock-title">Itens com estoque baixo</h2>
-                    <ul class="admin-dashboard__stock-list">
-                        {% for item in low_stock_items %}
-                            <li>
-                                <span>{{ item.name }}</span>
-                                <span>{{ item.quantity_on_hand }} {{ item.unit }}</span>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </section>
-            {% endif %}
+            <div class="admin-dashboard__columns">
+                {% if can_view_appointments %}
+                    <section class="admin-dashboard__section" aria-labelledby="upcoming-title">
+                        <div class="admin-dashboard__section-heading">
+                            <h2 id="upcoming-title">Próximos agendamentos</h2>
+                            <a href="{% url 'admin:Agendamento_appointment_changelist' %}">Ver agenda</a>
+                        </div>
+                        <div class="admin-dashboard__table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Horário</th>
+                                        <th scope="col">Cliente</th>
+                                        <th scope="col">Serviço</th>
+                                        <th scope="col">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in upcoming_appointments %}
+                                        <tr>
+                                            <td>{{ appointment.scheduled_at|date:"d/m/Y H:i" }}</td>
+                                            <td>{{ appointment.customer.name }}</td>
+                                            <td>
+                                                {% for item in appointment.appointmentxservice_set.all %}
+                                                    {{ item.service.name }}{% if not forloop.last %}, {% endif %}
+                                                {% empty %}
+                                                    —
+                                                {% endfor %}
+                                            </td>
+                                            <td><span class="admin-dashboard__badge">{{ appointment.get_status_display }}</span></td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="4">Nenhum agendamento futuro.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                {% endif %}
+
+                {% if can_view_stock %}
+                    <section class="admin-dashboard__section" aria-labelledby="low-stock-title">
+                        <div class="admin-dashboard__section-heading">
+                            <h2 id="low-stock-title">Alertas de estoque</h2>
+                            <a href="{% url 'admin:Agendamento_hairstock_changelist' %}?situacao=baixo">Ver estoque</a>
+                        </div>
+                        <div class="admin-dashboard__table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Produto</th>
+                                        <th scope="col">Disponível</th>
+                                        <th scope="col">Mínimo</th>
+                                        <th scope="col">Situação</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in stock_alert_items %}
+                                        <tr>
+                                            <td>{{ item.name }}</td>
+                                            <td>{{ item.quantity_on_hand }} {{ item.unit }}</td>
+                                            <td>{{ item.minimum_stock }} {{ item.unit }}</td>
+                                            <td>
+                                                {% if item.quantity_on_hand <= 0 %}
+                                                    <span class="admin-dashboard__badge admin-dashboard__badge--out">Esgotado</span>
+                                                {% else %}
+                                                    <span class="admin-dashboard__badge admin-dashboard__badge--low">Estoque baixo</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="4">Nenhum produto precisa de reposição.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                {% endif %}
+            </div>
+
+            <div class="admin-dashboard__columns admin-dashboard__columns--bottom">
+                {% if quick_actions %}
+                    <section class="admin-dashboard__section" aria-labelledby="quick-actions-title">
+                        <h2 id="quick-actions-title">Ações rápidas</h2>
+                        <nav class="admin-dashboard__actions" aria-label="Ações rápidas">
+                            {% for action in quick_actions %}
+                                <a href="{{ action.url }}">
+                                    <span class="material-symbols-outlined" aria-hidden="true">{{ action.icon }}</span>
+                                    {{ action.label }}
+                                </a>
+                            {% endfor %}
+                        </nav>
+                    </section>
+                {% endif %}
+
+                {% if can_view_movements %}
+                    <section class="admin-dashboard__section" aria-labelledby="movements-title">
+                        <div class="admin-dashboard__section-heading">
+                            <h2 id="movements-title">Últimas movimentações de estoque</h2>
+                            <a href="{% url 'admin:Agendamento_hairmovement_changelist' %}">Ver todas</a>
+                        </div>
+                        <div class="admin-dashboard__table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Data</th>
+                                        <th scope="col">Produto</th>
+                                        <th scope="col">Tipo</th>
+                                        <th scope="col">Quantidade</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for movement in recent_stock_movements %}
+                                        <tr>
+                                            <td>{{ movement.created_at|date:"d/m/Y H:i" }}</td>
+                                            <td>{{ movement.hair_stock.name }}</td>
+                                            <td>
+                                                {% if movement.movement_type == "entrada" %}
+                                                    <span class="admin-dashboard__movement--in">{{ movement.get_movement_type_display }}</span>
+                                                {% else %}
+                                                    <span class="admin-dashboard__movement--out">{{ movement.get_movement_type_display }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ movement.quantity }} {{ movement.hair_stock.unit }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="4">Ainda não há movimentações registradas.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                {% endif %}
+            </div>
         {% else %}
             <p>Seu usuário ainda não tem permissão para visualizar os indicadores do painel.</p>
         {% endif %}

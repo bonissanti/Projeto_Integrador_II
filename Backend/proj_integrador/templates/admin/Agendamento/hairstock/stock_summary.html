@@ -1,0 +1,24 @@
+{% load i18n %}
+
+<section class="stock-overview" aria-label="Resumo do estoque">
+    <a class="stock-overview__card stock-overview__card--total" href="{% url 'admin:Agendamento_hairstock_changelist' %}">
+        <span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>
+        <strong>{{ stock_overview.total }}</strong>
+        <span>Produtos ativos</span>
+    </a>
+    <a class="stock-overview__card stock-overview__card--normal" href="{% url 'admin:Agendamento_hairstock_changelist' %}?situacao=normal">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <strong>{{ stock_overview.normal }}</strong>
+        <span>Estoque normal</span>
+    </a>
+    <a class="stock-overview__card stock-overview__card--low" href="{% url 'admin:Agendamento_hairstock_changelist' %}?situacao=baixo">
+        <span class="material-symbols-outlined" aria-hidden="true">warning</span>
+        <strong>{{ stock_overview.low }}</strong>
+        <span>Estoque baixo</span>
+    </a>
+    <a class="stock-overview__card stock-overview__card--out" href="{% url 'admin:Agendamento_hairstock_changelist' %}?situacao=esgotado">
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
+        <strong>{{ stock_overview.out }}</strong>
+        <span>Esgotados</span>
+    </a>
+</section>

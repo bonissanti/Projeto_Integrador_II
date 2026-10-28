@@ -1,6 +1,8 @@
 from django.contrib.auth.hashers import make_password, check_password
 from .managers import AppointmentsManager, CustomerManager, ServiceManager, HairStockManager
+from django.core.validators import MinValueValidator
 from django.db import models
+from decimal import Decimal
 
 # Create your models here.
 class Customer(models.Model):
@@ -115,13 +117,28 @@ class HairStock(models.Model):
     unit = models.CharField(
         'Unidade', max_length=20, default='un', help_text="Ex: un, pacote, g, m"
     )
+    consumption_unit = models.CharField(
+        'Unidade de consumo',
+        max_length=20,
+        blank=True,
+        default='',
+        help_text="Unidade usada no consumo por serviço; vazia usa a unidade do estoque.",
+    )
+    consumption_factor = models.DecimalField(
+        'Consumo por unidade de estoque',
+        max_digits=12,
+        decimal_places=4,
+        default=Decimal('1'),
+        validators=[MinValueValidator(Decimal('0.0001'))],
+        help_text="Quantidade na unidade de consumo contida em uma unidade de estoque.",
+    )
     unit_price = models.DecimalField('Preço unitário', max_digits=8, decimal_places=2)
     quantity_on_hand = models.DecimalField(
-        'Quantidade disponível', max_digits=10, decimal_places=2, default=0
+        'Quantidade disponível', max_digits=10, decimal_places=6, default=0
     )
     minimum_stock = models.DecimalField(
         'Estoque mínimo',
-        max_digits=10, decimal_places=2, default=0,
+        max_digits=10, decimal_places=6, default=0,
         help_text="Alerta de estoque baixo quando a quantidade disponível ficar igual ou abaixo deste valor"
     )
     deleted = models.BooleanField('Excluído', default=False)
@@ -133,9 +150,19 @@ class HairStock(models.Model):
         ordering = ['name']
         verbose_name = 'Item de estoque'
         verbose_name_plural = 'Itens de estoque'
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(consumption_factor__gt=0),
+                name='hair_stock_consumption_factor_positive',
+            ),
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.quantity_on_hand} {self.unit})"
+
+    @property
+    def service_unit(self):
+        return self.consumption_unit or self.unit
 
     @property
     def is_low_stock(self):
@@ -158,7 +185,7 @@ class ServiceHairStock(models.Model):
         'Consumo por atendimento',
         max_digits=10,
         decimal_places=2,
-        help_text="Quantidade consumida por agendamento",
+        help_text="Quantidade consumida na unidade de consumo cadastrada no item.",
     )
 
     class Meta:
@@ -167,7 +194,10 @@ class ServiceHairStock(models.Model):
         verbose_name_plural = 'Consumos de estoque por serviço'
 
     def __str__(self):
-        return f"{self.service.name} consome {self.quantity} {self.hair_stock.unit} de {self.hair_stock.name}"
+        return (
+            f"{self.service.name} consome {self.quantity} "
+            f"{self.hair_stock.service_unit} de {self.hair_stock.name}"
+        )
 
 
 class HairMovement(models.Model):
@@ -180,7 +210,7 @@ class HairMovement(models.Model):
         HairStock, on_delete=models.PROTECT, related_name='movements', verbose_name='Item de estoque'
     )
     movement_type = models.CharField('Tipo de movimentação', max_length=10, choices=MOVEMENT_CHOICES)
-    quantity = models.DecimalField('Quantidade', max_digits=10, decimal_places=2)
+    quantity = models.DecimalField('Quantidade', max_digits=10, decimal_places=6)
     unit_price_at_time = models.DecimalField(
         'Preço unitário na movimentação', max_digits=8, decimal_places=2
     )

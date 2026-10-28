@@ -29,6 +29,26 @@ O sistema controla o estoque de cabelo usado nos atendimentos através de 3 peç
    - **Minimum stock**: quantidade mínima que, quando atingida, dispara um aviso automático pra você no Telegram.
 3. Salve.
 
+### Importar o estoque inicial de uma planilha
+
+1. No Admin, abra **Hair stocks** e clique em **Importar planilha**.
+2. Envie o arquivo `.xlsx` com as abas **Estoque inicial** e **Consumo por procedimento**.
+3. Confira a prévia. Itens que já existem serão ignorados e terão o saldo atual preservado.
+4. Se a planilha não tiver preço unitário, marque a confirmação para importar os novos itens sem preço como **R$ 0,00**.
+5. Confirme a importação. O saldo inicial será registrado também em **Hair movements**.
+
+O arquivo precisa ter até 5 MB. A importação lê os dados de consumo para exibição, mas não os associa automaticamente aos serviços: os procedimentos da planilha precisam ser mapeados aos serviços existentes e as unidades de consumo, convertidas conforme cada produto.
+
+### Configurar unidades de consumo diferentes
+
+Quando o produto é comprado em uma unidade e consumido em outra, configure a conversão no item de estoque:
+
+- **Unit**: unidade em que o estoque é comprado e controlado (ex.: `frasco`).
+- **Consumption unit**: unidade usada na receita do serviço (ex.: `ml`).
+- **Consumption per stock unit**: quantidade de unidades de consumo contidas em uma unidade de estoque (ex.: `200`, se 1 frasco contém 200 ml).
+
+No exemplo, configure `frasco`, `ml` e `200`. Depois, informe o consumo por atendimento em **Services → Consumo de estoque** usando `ml`. O sistema converte o consumo para a unidade do estoque ao registrar a saída.
+
 ## 4. Passo a passo: configurando quanto cada serviço consome (uma vez só)
 
 Isso é o que faz o débito automático funcionar. **Sem este passo, agendar um serviço não desconta nada do estoque.**
@@ -37,7 +57,7 @@ Isso é o que faz o débito automático funcionar. **Sem este passo, agendar um 
 2. Role até a seção **"Consumo de cabelo"**.
 3. Clique para adicionar uma linha:
    - **Hair stock**: escolha o item de cabelo usado nesse serviço (ex: "cabelo").
-   - **Quantity**: quantidade consumida **por atendimento** desse serviço (ex: `6`, se o serviço usa 6 unidades/gramas por vez).
+   - **Quantity**: quantidade consumida **por atendimento**, na unidade de consumo do item (ex.: `30 ml`).
 4. Se o serviço usa mais de um tipo de cabelo, adicione mais linhas (uma por item).
 5. Salve o serviço.
 
@@ -49,7 +69,7 @@ Repita esse processo pra cada serviço que você oferece. É **configuração ú
 
 A partir do momento em que você configurou o "Consumo de cabelo" de um serviço (seção 4):
 
-- Toda vez que um cliente agenda aquele serviço — seja pelo **site** ou pelo **bot do Telegram/WhatsApp** — o sistema automaticamente desconta a quantidade configurada do **Hair stock** correspondente.
+- Toda vez que um cliente agenda aquele serviço — seja pelo **site** ou pelo **bot do Telegram** — o sistema automaticamente desconta a quantidade configurada do **Hair stock** correspondente.
 - Isso acontece no momento em que o agendamento é criado (confirmado), não precisa fazer nada manualmente.
 - Cada desconto automático gera uma linha em **Hair movements**, já ligada ao agendamento que causou aquele consumo — assim você sempre consegue rastrear "por que esse estoque baixou".
 
