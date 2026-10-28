@@ -82,6 +82,8 @@ make check
 
 Configure `DATABASE_URL` (PostgreSQL), `SECRET_KEY` e `DEBUG=False` nas variáveis de ambiente do serviço. Para o bot, configure também `TELEGRAM_BOT_TOKEN` e, se usado, `TELEGRAM_WEBHOOK_SECRET` e `TELEGRAM_ADMIN_CHAT_ID`.
 
+No primeiro start, `make render-start` cria o superusuário padrão se ainda não houver nenhum: usuário `admin`, senha `12345`. A conta existente não é alterada. **Troque essa senha imediatamente após o primeiro acesso ao painel.**
+
 Defina os comandos do serviço:
 
 **Build Command**
